@@ -1,34 +1,37 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.createTable("invitations", {
     id: {
       allowNull: false,
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     email: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
     created_at: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     updated_at: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     confirmed_at: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     confirmation_token: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
     },
     confirmation_sent_at: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   });
 
-exports.down = (queryInterface) => queryInterface.dropTable("invitations");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("invitations");

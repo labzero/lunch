@@ -1,13 +1,15 @@
+import { DataTypes } from "sequelize";
+
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up({ context: queryInterface }) {
     await queryInterface.changeColumn("invitations", "email", {
-      type: Sequelize.CITEXT,
+      type: DataTypes.CITEXT,
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down({ context: queryInterface }) {
     await queryInterface.changeColumn("invitations", "email", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     });
   },
 };

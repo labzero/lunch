@@ -1,9 +1,11 @@
-exports.up = (queryInterface, Sequelize) => {
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
-      name: Sequelize.STRING,
-      slug: Sequelize.STRING(63),
+      name: DataTypes.STRING,
+      slug: DataTypes.STRING(63),
     },
     {
       underscored: true,
@@ -14,13 +16,13 @@ exports.up = (queryInterface, Sequelize) => {
     () =>
       queryInterface.changeColumn("teams", "slug", {
         allowNull: false,
-        type: Sequelize.STRING(63),
+        type: DataTypes.STRING(63),
       })
   );
 };
 
-exports.down = (queryInterface, Sequelize) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface.changeColumn("teams", "slug", {
     allowNull: true,
-    type: Sequelize.STRING(63),
+    type: DataTypes.STRING(63),
   });

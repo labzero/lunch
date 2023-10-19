@@ -1,9 +1,11 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.createTable(
     "restaurants_tags",
     {
       restaurant_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: "restaurants",
           key: "id",
@@ -12,7 +14,7 @@ exports.up = (queryInterface, Sequelize) =>
         onDelete: "cascade",
       },
       tag_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: "tags",
           key: "id",
@@ -22,11 +24,11 @@ exports.up = (queryInterface, Sequelize) =>
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     },
     {
@@ -38,4 +40,5 @@ exports.up = (queryInterface, Sequelize) =>
     }
   );
 
-exports.down = (queryInterface) => queryInterface.dropTable("restaurants_tags");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("restaurants_tags");

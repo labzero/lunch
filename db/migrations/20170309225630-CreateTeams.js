@@ -1,8 +1,10 @@
-exports.up = (queryInterface, Sequelize) => {
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
-      name: Sequelize.STRING,
+      name: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -15,19 +17,19 @@ exports.up = (queryInterface, Sequelize) => {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
       },
       name: {
         allowNull: false,
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     })
     .then(() =>
@@ -37,4 +39,5 @@ exports.up = (queryInterface, Sequelize) => {
     );
 };
 
-exports.down = (queryInterface) => queryInterface.dropTable("teams");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("teams");

@@ -1,23 +1,26 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.createTable("tags", {
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
     },
     name: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
     },
     created_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     updated_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   });
 
-exports.down = (queryInterface) => queryInterface.dropTable("tags");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("tags");

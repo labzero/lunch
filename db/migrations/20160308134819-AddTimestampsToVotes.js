@@ -1,16 +1,18 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("votes", "created_at", {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     }),
     queryInterface.addColumn("votes", "updated_at", {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     }),
   ]);
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("votes", "created_at"),
     queryInterface.removeColumn("votes", "updated_at"),

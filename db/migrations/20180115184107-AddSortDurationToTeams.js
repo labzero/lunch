@@ -1,11 +1,13 @@
+import { DataTypes } from "sequelize";
+
 module.exports = {
-  up: (queryInterface, Sequelize) =>
+  up: ({ context: queryInterface }) =>
     queryInterface.addColumn("teams", "sort_duration", {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 28,
     }),
 
-  down: (queryInterface) =>
+  down: ({ context: queryInterface }) =>
     queryInterface.removeColumn("teams", "sort_duration"),
 };

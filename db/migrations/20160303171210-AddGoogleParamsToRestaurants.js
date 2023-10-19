@@ -1,18 +1,20 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("restaurants", "place_id", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
     }),
     queryInterface.addColumn("restaurants", "lat", {
-      type: Sequelize.FLOAT,
+      type: DataTypes.FLOAT,
     }),
     queryInterface.addColumn("restaurants", "lng", {
-      type: Sequelize.FLOAT,
+      type: DataTypes.FLOAT,
     }),
   ]);
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("restaurants", "place_id"),
     queryInterface.removeColumn("restaurants", "lat"),

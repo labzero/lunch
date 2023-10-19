@@ -1,23 +1,26 @@
-exports.up = (queryInterface) => queryInterface.dropTable("whitelist_emails");
+import { DataTypes } from "sequelize";
 
-exports.down = (queryInterface, Sequelize) =>
+exports.up = ({ context: queryInterface }) =>
+  queryInterface.dropTable("whitelist_emails");
+
+exports.down = ({ context: queryInterface }) =>
   queryInterface.createTable("whitelist_emails", {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     email: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
     created_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     updated_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   });

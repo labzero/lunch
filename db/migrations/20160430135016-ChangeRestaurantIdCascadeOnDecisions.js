@@ -1,4 +1,6 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.sequelize
     .query(
       "ALTER TABLE decisions DROP CONSTRAINT IF EXISTS decisions_restaurant_id_fkey"
@@ -10,7 +12,7 @@ exports.up = (queryInterface, Sequelize) =>
         )
         .then(() =>
           queryInterface.changeColumn("decisions", "restaurant_id", {
-            type: Sequelize.INTEGER,
+            type: DataTypes.INTEGER,
             references: {
               model: "restaurants",
               key: "id",
@@ -21,14 +23,14 @@ exports.up = (queryInterface, Sequelize) =>
         )
     );
 
-exports.down = (queryInterface, Sequelize) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface.sequelize
     .query(
       "ALTER TABLE decisions DROP CONSTRAINT IF EXISTS restaurant_id_foreign_idx"
     )
     .then(() =>
       queryInterface.changeColumn("decisions", "restaurant_id", {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: "restaurants",
           key: "id",

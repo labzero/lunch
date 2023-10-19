@@ -1,28 +1,30 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("users", "encrypted_password", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     }),
     queryInterface.addColumn("users", "reset_password_token", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
     }),
     queryInterface.addColumn("users", "reset_password_sent_at", {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     }),
     queryInterface.addColumn("users", "confirmation_token", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
     }),
     queryInterface.addColumn("users", "confirmed_at", {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     }),
     queryInterface.addColumn("users", "confirmation_sent_at", {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     }),
   ]);
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("users", "encrypted_password"),
     queryInterface.removeColumn("users", "reset_password_token"),

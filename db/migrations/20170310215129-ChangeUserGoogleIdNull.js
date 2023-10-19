@@ -1,13 +1,15 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.changeColumn("users", "google_id", {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
   });
 
-exports.down = (queryInterface, Sequelize) => {
+exports.down = ({ context: queryInterface }) => {
   const User = queryInterface.sequelize.define(
     "user",
     {
-      google_id: Sequelize.STRING,
+      google_id: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -16,7 +18,7 @@ exports.down = (queryInterface, Sequelize) => {
 
   return User.destroy({ where: { google_id: null } }).then(() =>
     queryInterface.changeColumn("users", "google_id", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     })
   );

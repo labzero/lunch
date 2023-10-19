@@ -1,5 +1,5 @@
 module.exports = {
-  up: (queryInterface) =>
+  up: ({ context: queryInterface }) =>
     Promise.all([
       queryInterface.addIndex("decisions", ["created_at"]),
       queryInterface.addIndex("decisions", ["restaurant_id"]),
@@ -13,7 +13,7 @@ module.exports = {
       queryInterface.addIndex("votes", ["user_id"]),
     ]),
 
-  down: (queryInterface) =>
+  down: ({ context: queryInterface }) =>
     Promise.all([
       queryInterface.removeIndex("decisions", "decisions_created_at"),
       queryInterface.removeIndex("decisions", "decisions_restaurant_id"),

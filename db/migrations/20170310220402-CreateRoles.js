@@ -1,10 +1,12 @@
-exports.up = (queryInterface, Sequelize) => {
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) => {
   const User = queryInterface.sequelize.define(
     "user",
     {
-      google_id: Sequelize.STRING,
-      name: Sequelize.STRING,
-      email: Sequelize.STRING,
+      google_id: DataTypes.STRING,
+      name: DataTypes.STRING,
+      email: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -14,7 +16,7 @@ exports.up = (queryInterface, Sequelize) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
-      name: Sequelize.STRING,
+      name: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -29,14 +31,14 @@ exports.up = (queryInterface, Sequelize) => {
           allowNull: false,
           autoIncrement: true,
           primaryKey: true,
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
         },
         type: {
           allowNull: false,
-          type: Sequelize.ENUM("guest", "member", "owner"),
+          type: DataTypes.ENUM("guest", "member", "owner"),
         },
         team_id: {
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
           references: {
             model: "teams",
             key: "id",
@@ -45,7 +47,7 @@ exports.up = (queryInterface, Sequelize) => {
           onDelete: "cascade",
         },
         user_id: {
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
           references: {
             model: "users",
             key: "id",
@@ -55,11 +57,11 @@ exports.up = (queryInterface, Sequelize) => {
         },
         created_at: {
           allowNull: false,
-          type: Sequelize.DATE,
+          type: DataTypes.DATE,
         },
         updated_at: {
           allowNull: false,
-          type: Sequelize.DATE,
+          type: DataTypes.DATE,
         },
       },
       {
@@ -78,10 +80,10 @@ exports.up = (queryInterface, Sequelize) => {
           {
             type: {
               allowNull: false,
-              type: Sequelize.ENUM("guest", "member", "owner"),
+              type: DataTypes.ENUM("guest", "member", "owner"),
             },
             user_id: {
-              type: Sequelize.INTEGER,
+              type: DataTypes.INTEGER,
               references: {
                 model: "user",
                 key: "id",
@@ -90,7 +92,7 @@ exports.up = (queryInterface, Sequelize) => {
               onDelete: "cascade",
             },
             team_id: {
-              type: Sequelize.INTEGER,
+              type: DataTypes.INTEGER,
               references: {
                 model: "team",
                 key: "id",
@@ -122,7 +124,7 @@ exports.up = (queryInterface, Sequelize) => {
     );
 };
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface
     .dropTable("roles")
     .then(() => queryInterface.sequelize.query("DROP TYPE enum_roles_type"));

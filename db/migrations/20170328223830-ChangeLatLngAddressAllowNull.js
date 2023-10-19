@@ -1,12 +1,14 @@
-exports.up = (queryInterface, Sequelize) => {
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
-      name: Sequelize.STRING,
-      slug: Sequelize.STRING(63),
-      lat: Sequelize.DOUBLE,
-      lng: Sequelize.DOUBLE,
-      address: Sequelize.STRING,
+      name: DataTypes.STRING,
+      slug: DataTypes.STRING(63),
+      lat: DataTypes.DOUBLE,
+      lng: DataTypes.DOUBLE,
+      address: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -25,25 +27,25 @@ exports.up = (queryInterface, Sequelize) => {
   ).then(() =>
     Promise.all([
       queryInterface.changeColumn("teams", "lat", {
-        type: Sequelize.DOUBLE,
+        type: DataTypes.DOUBLE,
         allowNull: false,
       }),
       queryInterface.changeColumn("teams", "lng", {
-        type: Sequelize.DOUBLE,
+        type: DataTypes.DOUBLE,
         allowNull: false,
       }),
     ])
   );
 };
 
-exports.down = (queryInterface, Sequelize) =>
+exports.down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.changeColumn("teams", "lat", {
       allowNull: true,
-      type: Sequelize.DOUBLE,
+      type: DataTypes.DOUBLE,
     }),
     queryInterface.changeColumn("teams", "lng", {
       allowNull: true,
-      type: Sequelize.DOUBLE,
+      type: DataTypes.DOUBLE,
     }),
   ]);

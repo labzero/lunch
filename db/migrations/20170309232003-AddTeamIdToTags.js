@@ -1,8 +1,10 @@
-exports.up = (queryInterface, Sequelize) => {
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
-      name: Sequelize.STRING,
+      name: DataTypes.STRING,
     },
     {
       underscored: true,
@@ -11,7 +13,7 @@ exports.up = (queryInterface, Sequelize) => {
 
   return Team.findOne().then((team) =>
     queryInterface.addColumn("tags", "team_id", {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       references: {
         model: "teams",
         key: "id",
@@ -23,5 +25,5 @@ exports.up = (queryInterface, Sequelize) => {
   );
 };
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("tags", "team_id");

@@ -25,7 +25,13 @@
     "typeRoots": ["./typings", "node_modules/@types"]
   },
   "files": ["./global.d.ts"],
-  "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./*.d.ts",
+    "test/setup.ts",
+    "test/mocha-setup.ts"
+  ],
   "exclude": ["node_modules"],
   "ts-node": {
     "files": true,

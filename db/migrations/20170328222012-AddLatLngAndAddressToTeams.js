@@ -1,17 +1,19 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("teams", "lat", {
-      type: Sequelize.DOUBLE,
+      type: DataTypes.DOUBLE,
     }),
     queryInterface.addColumn("teams", "lng", {
-      type: Sequelize.DOUBLE,
+      type: DataTypes.DOUBLE,
     }),
     queryInterface.addColumn("teams", "address", {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     }),
   ]);
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("teams", "lat"),
     queryInterface.removeColumn("teams", "lng"),

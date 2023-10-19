@@ -1,12 +1,14 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.createTable("decisions", {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     restaurant_id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
 
       references: {
         model: "restaurants",
@@ -16,12 +18,13 @@ exports.up = (queryInterface, Sequelize) =>
     },
     created_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     updated_at: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   });
 
-exports.down = (queryInterface) => queryInterface.dropTable("decisions");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("decisions");

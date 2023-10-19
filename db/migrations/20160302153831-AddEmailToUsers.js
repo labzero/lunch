@@ -1,7 +1,9 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.addColumn("users", "email", {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
   });
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("users", "email");

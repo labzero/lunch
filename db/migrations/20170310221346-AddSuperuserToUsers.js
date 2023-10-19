@@ -1,18 +1,20 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface
     .addColumn("users", "superuser", {
       allowNull: false,
-      type: Sequelize.BOOLEAN,
+      type: DataTypes.BOOLEAN,
       defaultValue: false,
     })
     .then(() => {
       const User = queryInterface.sequelize.define(
         "user",
         {
-          google_id: Sequelize.STRING,
-          name: Sequelize.STRING,
-          email: Sequelize.STRING,
-          superuser: Sequelize.BOOLEAN,
+          google_id: DataTypes.STRING,
+          name: DataTypes.STRING,
+          email: DataTypes.STRING,
+          superuser: DataTypes.BOOLEAN,
         },
         {
           underscored: true,
@@ -31,5 +33,5 @@ exports.up = (queryInterface, Sequelize) =>
       );
     });
 
-exports.down = (queryInterface) =>
+exports.down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("users", "superuser");

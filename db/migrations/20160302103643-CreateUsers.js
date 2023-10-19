@@ -1,17 +1,20 @@
-exports.up = (queryInterface, Sequelize) =>
+import { DataTypes } from "sequelize";
+
+exports.up = ({ context: queryInterface }) =>
   queryInterface.createTable("users", {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     google_id: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     name: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
   });
 
-exports.down = (queryInterface) => queryInterface.dropTable("users");
+exports.down = ({ context: queryInterface }) =>
+  queryInterface.dropTable("users");
