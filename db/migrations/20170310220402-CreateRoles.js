@@ -127,4 +127,6 @@ exports.up = ({ context: queryInterface }) => {
 exports.down = ({ context: queryInterface }) =>
   queryInterface
     .dropTable("roles", {})
-    .then(() => queryInterface.sequelize.query("DROP TYPE enum_roles_type"));
+    .then(() =>
+      queryInterface.sequelize.query("DROP TYPE IF EXISTS enum_roles_type")
+    );
