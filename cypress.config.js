@@ -4,7 +4,6 @@ const { defineConfig } = require("cypress");
 require("dotenv").config({ path: "./.env.test" });
 
 module.exports = defineConfig({
-  port: 4000,
   env: {
     subdomain: "http://integration-test.local.lunch.pink:3000/",
     superuserEmail: process.env.SUPERUSER_EMAIL,
