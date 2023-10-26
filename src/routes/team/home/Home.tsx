@@ -27,15 +27,15 @@ export interface HomeProps {
   invalidateUsers: () => void;
   messageReceived: (event: MessageEvent) => void;
   pastDecisionsShown: boolean;
-  wsPort: number;
+  port: number;
 }
 
 export class _Home extends Component<HomeProps> {
   static contextType = GoogleMapsLoaderContext;
 
-  fetchAllInterval: NodeJS.Timer;
+  fetchAllInterval: NodeJS.Timeout;
 
-  pingInterval: NodeJS.Timer;
+  pingInterval: NodeJS.Timeout;
 
   socket: RobustWebSocket;
 
@@ -53,7 +53,7 @@ export class _Home extends Component<HomeProps> {
   }
 
   componentDidMount() {
-    const { messageReceived, wsPort } = this.props;
+    const { messageReceived, port } = this.props;
 
     this.props.invalidateDecisions();
     this.props.invalidateRestaurants();
@@ -64,11 +64,11 @@ export class _Home extends Component<HomeProps> {
       let host = window.location.host;
       if (
         window.location.port &&
-        typeof wsPort === "number" &&
-        wsPort !== 0 &&
-        wsPort !== Number(window.location.port)
+        typeof port === "number" &&
+        port !== 0 &&
+        port !== Number(window.location.port)
       ) {
-        host = `${window.location.hostname}:${wsPort}`;
+        host = `${window.location.hostname}:${port}`;
       }
       let protocol = "ws:";
       if (window.location.protocol === "https:") {

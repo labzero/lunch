@@ -3,7 +3,7 @@ import { sortRestaurants } from "./restaurants";
 import { notify } from "./notifications";
 import { Action, Dispatch, State } from "../interfaces";
 
-let sortTimeout: NodeJS.Timer;
+let sortTimeout: NodeJS.Timeout;
 
 const sort = (dispatch: Dispatch) => {
   clearTimeout(sortTimeout);

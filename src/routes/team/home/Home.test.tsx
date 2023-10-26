@@ -83,8 +83,8 @@ describe("Home", () => {
       invalidateUsers,
       messageReceived: () => undefined,
       pastDecisionsShown: false,
+      port: 3000,
       user: null,
-      wsPort: 3000,
     };
   });
 

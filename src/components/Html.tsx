@@ -110,14 +110,14 @@ gtag('config', '${config.analytics.googleMeasurementId}');
           <script
             dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }}
           />
-          {!module.hot && (
+          {/* !module.hot && (
             <script
               dangerouslySetInnerHTML={{
                 __html:
                   "if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js').then(function(registration) {registration.addEventListener('updatefound', () => {window.swUpdate = true; }); }); }); }",
               }}
             />
-          )}
+            ) */}
           {scripts!.map((script) => (
             <script key={script} src={script} />
           ))}

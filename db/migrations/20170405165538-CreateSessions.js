@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.createTable("Sessions", {
     sid: {
       type: DataTypes.STRING(32),
@@ -12,5 +12,5 @@ exports.up = ({ context: queryInterface }) =>
     updatedAt: DataTypes.DATE,
   });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.dropTable("Sessions", {});

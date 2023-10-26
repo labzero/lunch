@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.createTable("decisions", {
     id: {
       type: DataTypes.INTEGER,
@@ -26,5 +26,5 @@ exports.up = ({ context: queryInterface }) =>
     },
   });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.dropTable("decisions", {});

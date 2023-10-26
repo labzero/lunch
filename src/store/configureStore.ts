@@ -17,6 +17,7 @@ import {
 // eslint-disable-next-line default-param-last
 const generateReducer =
   <T extends keyof State>(reducer: Reducer<T>, initial: State[T]): Reducer<T> =>
+  // eslint-disable-next-line default-param-last
   (state = initial, action: Action) =>
     reducer(state, action);
 
@@ -26,13 +27,12 @@ const generateReducers = <T extends keyof State>(
 ) => {
   const rs: Partial<{ [key in T]: Reducer<key> }> = {};
 
-  let name: T;
-  for (name in newReducers) {
+  (Object.keys(newReducers) as T[]).forEach((name) => {
     rs[name] = generateReducer<typeof name>(
       newReducers[name],
       normalizedInitialState[name]
     );
-  }
+  });
 
   return rs;
 };

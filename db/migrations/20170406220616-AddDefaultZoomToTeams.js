@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.addColumn("teams", "default_zoom", {
     type: DataTypes.INTEGER,
   });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("teams", "default_zoom");

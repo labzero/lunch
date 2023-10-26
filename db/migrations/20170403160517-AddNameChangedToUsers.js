@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.addColumn("users", "name_changed", {
     defaultValue: false,
     type: DataTypes.BOOLEAN,
   });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("users", "name_changed");

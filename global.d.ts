@@ -8,6 +8,10 @@ declare interface Window {
   swUpdate?: boolean;
 }
 
+namespace global {
+  let Bun: { [index: string]: any } | undefined;
+}
+
 type Dispose = () => void;
 type InsertCssItem = () => Dispose;
 type GetCSSItem = () => string;

@@ -1,4 +1,4 @@
-import { host, wsPort } from "./config";
+import { host, port } from "./config";
 import { NonNormalizedState, StateData } from "./interfaces";
 
 const getInitialState = (): NonNormalizedState => ({
@@ -45,7 +45,7 @@ const getInitialState = (): NonNormalizedState => ({
     didInvalidate: true,
     items: [],
   },
-  wsPort: module.hot ? Number(wsPort) : 0,
+  port: module.hot ? port : 0,
 });
 
 export default (stateData: StateData) => {

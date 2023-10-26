@@ -17,4 +17,4 @@ export { default as user } from "./user";
 export { default as users } from "./users";
 
 export const host: Reducer<"host"> = (state) => state;
-export const wsPort: Reducer<"wsPort"> = (state) => state;
+export const port: Reducer<"port"> = (state) => state;

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) => {
+export const up = ({ context: queryInterface }) => {
   const Team = queryInterface.sequelize.define(
     "team",
     {
@@ -21,7 +21,7 @@ exports.up = ({ context: queryInterface }) => {
   );
 };
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.changeColumn("teams", "slug", {
     allowNull: true,
     type: DataTypes.STRING(63),

@@ -103,7 +103,7 @@ passport.use(
         if (!user || !user.get("encryptedPassword")) {
           return done(null, false, { message });
         }
-        const passwordValid = await Bun.password.verify(
+        const passwordValid = await global.Bun!.password.verify(
           password,
           user.get("encryptedPassword")!
         );

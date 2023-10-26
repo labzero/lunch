@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.sequelize
     .query(
       "ALTER TABLE decisions DROP CONSTRAINT IF EXISTS decisions_restaurant_id_fkey"
@@ -23,7 +23,7 @@ exports.up = ({ context: queryInterface }) =>
         )
     );
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.sequelize
     .query(
       "ALTER TABLE decisions DROP CONSTRAINT IF EXISTS restaurant_id_foreign_idx"

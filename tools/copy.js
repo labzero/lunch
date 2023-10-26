@@ -40,7 +40,6 @@ async function copy() {
     copyDir("public", "build/public"),
     copyFile("database.js", "build/database.js"),
     copyFile(".sequelizerc", "build/.sequelizerc"),
-    copyDir("db", "build/db"),
     copyDir("cert", "build/cert"),
   ]);
 

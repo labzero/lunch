@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.addColumn("restaurants", "address", {
     type: DataTypes.STRING,
     allowNull: false,
   });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("restaurants", "address");

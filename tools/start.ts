@@ -9,15 +9,19 @@
 
 /* eslint-disable no-promise-executor-return */
 
-import fs from "fs";
 import path from "path";
-import express from "express";
-import webpack from "webpack";
+import express, { Application } from "express";
+import webpack, {
+  Compiler,
+  Configuration,
+  EntryObject,
+  ModuleOptions,
+  RuleSetRule,
+} from "webpack";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import createLaunchEditorMiddleware from "react-dev-utils/errorOverlayMiddleware";
-import https from "https";
-import webpackConfig from "./webpack.config";
+import webpackConfig, { clientConfig, serverConfig } from "./webpack.config";
 import run from "./lib/runTask";
 import clean from "./clean";
 import formatDate from "./lib/formatDate";
@@ -31,7 +35,11 @@ const watchOptions = {
   // ignored: /node_modules/,
 };
 
-function createCompilationPromise(name, compiler, config) {
+function createCompilationPromise(
+  name: string,
+  compiler: Compiler,
+  config: Configuration
+) {
   return new Promise((resolve, reject) => {
     let timeStart = new Date();
     compiler.hooks.compile.tap(name, () => {
@@ -62,7 +70,7 @@ function createCompilationPromise(name, compiler, config) {
   });
 }
 
-let server;
+let server: Application;
 
 /**
  * Launches a development web server with "live reload" functionality -
@@ -75,42 +83,50 @@ async function start() {
   server.use(express.static(path.resolve(__dirname, "../public")));
 
   // Configure client-side hot module replacement
-  const clientConfig = webpackConfig.find((config) => config.name === "client");
-  clientConfig.entry.client = ["./tools/lib/webpackHotDevClient"]
-    .concat(clientConfig.entry.client)
-    .sort((a, b) => b.includes("polyfill") - a.includes("polyfill"));
-  clientConfig.output.filename = clientConfig.output.filename.replace(
+  const clientEntry = clientConfig.entry as EntryObject;
+  (clientEntry.client as string[]) = ["./tools/lib/webpackHotDevClient"]
+    .concat(clientEntry.client as string[])
+    .sort(
+      (a, b) => Number(b.includes("polyfill")) - Number(a.includes("polyfill"))
+    );
+
+  const clientOutput = clientConfig.output!;
+
+  clientOutput.filename = (clientOutput.filename as string).replace(
     "chunkhash",
     "hash"
   );
-  clientConfig.output.chunkFilename = clientConfig.output.chunkFilename.replace(
+  clientOutput.chunkFilename = (clientOutput.chunkFilename as string).replace(
     "chunkhash",
     "hash"
   );
-  clientConfig.module.rules = clientConfig.module.rules.filter(
+
+  const clientModule = clientConfig.module as ModuleOptions;
+  clientModule.rules = (clientModule.rules as RuleSetRule[]).filter(
     (x) => x.loader !== "null-loader"
   );
-  clientConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
+  clientConfig.plugins!.push(new webpack.HotModuleReplacementPlugin());
 
   // Configure server-side hot module replacement
-  const serverConfig = webpackConfig.find((config) => config.name === "server");
-  serverConfig.output.hotUpdateMainFilename = "updates/[hash].hot-update.json";
-  serverConfig.output.hotUpdateChunkFilename =
-    "updates/[id].[hash].hot-update.js";
-  serverConfig.module.rules = serverConfig.module.rules.filter(
+  const serverOutput = serverConfig.output!;
+  serverOutput.hotUpdateMainFilename = "updates/[hash].hot-update.json";
+  serverOutput.hotUpdateChunkFilename = "updates/[id].[hash].hot-update.js";
+
+  const serverModule = serverConfig.module as ModuleOptions;
+  serverModule.rules = (serverModule.rules as RuleSetRule[]).filter(
     (x) => x.loader !== "null-loader"
   );
-  serverConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
+  serverConfig.plugins!.push(new webpack.HotModuleReplacementPlugin());
 
   // Configure compilation
   await run(clean);
   const multiCompiler = webpack(webpackConfig);
   const clientCompiler = multiCompiler.compilers.find(
     (compiler) => compiler.name === "client"
-  );
+  )!;
   const serverCompiler = multiCompiler.compilers.find(
     (compiler) => compiler.name === "server"
-  );
+  )!;
   const clientPromise = createCompilationPromise(
     "client",
     clientCompiler,
@@ -125,15 +141,15 @@ async function start() {
   // https://github.com/webpack/webpack-dev-middleware
   server.use(
     webpackDevMiddleware(clientCompiler, {
-      publicPath: clientConfig.output.publicPath,
+      publicPath: clientOutput.publicPath,
     })
   );
 
   // https://github.com/glenjamin/webpack-hot-middleware
   server.use(webpackHotMiddleware(clientCompiler, { log: false }));
 
-  let appPromise;
-  let appPromiseResolve;
+  let appPromise: Promise<void>;
+  let appPromiseResolve: () => void;
   let appPromiseIsResolved = true;
   serverCompiler.hooks.compile.tap("server", () => {
     if (!appPromiseIsResolved) return;
@@ -142,15 +158,16 @@ async function start() {
     appPromise = new Promise((resolve) => (appPromiseResolve = resolve));
   });
 
-  let app;
+  let app: Application | undefined;
   server.use((req, res) => {
     appPromise
-      .then(() => app.handle(req, res))
+      // @ts-expect-error app.handle is an internal function
+      .then(() => app!.handle(req, res))
       .catch((error) => console.error(error));
   });
 
   serverCompiler.watch(watchOptions, (error, stats) => {
-    if (app && !error && !stats.hasErrors()) {
+    if (app && !error && !stats!.hasErrors()) {
       appPromiseIsResolved = true;
       appPromiseResolve();
     }
@@ -168,23 +185,7 @@ async function start() {
   const build = require("../build/server");
   app = build.default;
   appPromiseIsResolved = true;
-  appPromiseResolve();
-
-  https
-    .createServer(
-      {
-        key: fs.readFileSync(
-          path.join(__dirname, "../cert/server.key"),
-          "utf-8"
-        ),
-        cert: fs.readFileSync(
-          path.join(__dirname, "../cert/server.crt"),
-          "utf-8"
-        ),
-      },
-      server
-    )
-    .listen(process.env.PORT || 3000);
+  appPromiseResolve!();
 
   const timeEnd = new Date();
   const time = timeEnd.getTime() - timeStart.getTime();

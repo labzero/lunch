@@ -1,6 +1,7 @@
 import { RequestHandler, Router } from "express";
 import jwt from "jsonwebtoken";
 import { AuthenticateOptionsGoogle } from "passport-google-oauth20";
+import { User } from "src/interfaces";
 import { auth, bsHost, domain } from "../config";
 import generateUrl from "../helpers/generateUrl";
 import passport from "../passport";
@@ -104,7 +105,7 @@ export default () => {
         passport.authenticate(
           "local",
           { session: false },
-          (err, user, info) => {
+          (err: Error, user: User, info: { message: string }) => {
             if (err) {
               return next(err);
             }

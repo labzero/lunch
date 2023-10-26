@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("restaurants", "created_at", {
       type: DataTypes.DATE,
@@ -12,7 +12,7 @@ exports.up = ({ context: queryInterface }) =>
     }),
   ]);
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("restaurants", "created_at"),
     queryInterface.removeColumn("restaurants", "updated_at"),

@@ -16,7 +16,7 @@ import { Dispatch, State } from "../../../interfaces";
 const mapStateToProps = (state: State) => ({
   pastDecisionsShown: !!state.modals.pastDecisions,
   user: state.user,
-  wsPort: state.wsPort,
+  port: state.port,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

@@ -21,6 +21,7 @@ export default (): RequestHandler => {
     .use("/users", usersApi())
     .ws("/", async (ws: ExtWebSocket, req) => {
       if (hasRole(req.user, req.team)) {
+        // eslint-disable-next-line no-param-reassign
         ws.teamId = req.team!.id;
       } else {
         ws.close(1008, "Not authorized for this team.");

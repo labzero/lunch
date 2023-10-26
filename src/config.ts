@@ -9,8 +9,7 @@
 
 /* eslint-disable max-len */
 
-export const port = process.env.PORT || 3000;
-export const wsPort = module.hot ? Number(port) + 10 : port;
+export const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 // https://expressjs.com/en/guide/behind-proxies.html
 export const trustProxy = process.env.TRUST_PROXY || "loopback";
 // API Gateway

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) => {
+export const up = ({ context: queryInterface }) => {
   const User = queryInterface.sequelize.define(
     "user",
     {
@@ -124,7 +124,7 @@ exports.up = ({ context: queryInterface }) => {
     );
 };
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface
     .dropTable("roles", {})
     .then(() =>

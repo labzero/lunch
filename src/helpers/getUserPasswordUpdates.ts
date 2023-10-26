@@ -1,7 +1,7 @@
 import { User } from "../interfaces";
 
 export default async (user: User, password: string) => {
-  const encryptedPassword = await Bun.password.hash(password, {
+  const encryptedPassword = await global.Bun!.password.hash(password, {
     algorithm: "bcrypt",
     cost: 10,
   });

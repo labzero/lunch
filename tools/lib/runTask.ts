@@ -1,6 +1,7 @@
 import formatDate from "./formatDate";
 
 function runTask(task: (o?: string) => Promise<void>, options?: string) {
+  // eslint-disable-next-line global-require
   require("../../env");
 
   const start = new Date();

@@ -1,11 +1,11 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface.changeColumn("users", "google_id", {
     type: DataTypes.STRING,
   });
 
-exports.down = ({ context: queryInterface }) => {
+export const down = ({ context: queryInterface }) => {
   const User = queryInterface.sequelize.define(
     "user",
     {

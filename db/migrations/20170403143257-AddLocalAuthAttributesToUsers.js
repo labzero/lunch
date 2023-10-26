@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.addColumn("users", "encrypted_password", {
       type: DataTypes.STRING,
@@ -24,7 +24,7 @@ exports.up = ({ context: queryInterface }) =>
     }),
   ]);
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   Promise.all([
     queryInterface.removeColumn("users", "encrypted_password"),
     queryInterface.removeColumn("users", "reset_password_token"),

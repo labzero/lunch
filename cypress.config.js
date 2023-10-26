@@ -3,14 +3,16 @@
 const { defineConfig } = require("cypress");
 require("dotenv").config({ path: "./.env.test" });
 
+const protocol = process.env.USE_HTTPS === "true" ? "https://" : "http://";
+
 module.exports = defineConfig({
   port: 4000,
   env: {
-    subdomain: "https://integration-test.local.lunch.pink:3000/",
+    subdomain: `${protocol}integration-test.local.lunch.pink:3000/`,
     superuserEmail: process.env.SUPERUSER_EMAIL,
     superuserPassword: process.env.SUPERUSER_PASSWORD,
   },
   e2e: {
-    baseUrl: "https://local.lunch.pink:3000/",
+    baseUrl: `${protocol}local.lunch.pink:3000/`,
   },
 });

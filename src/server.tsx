@@ -60,6 +60,20 @@ import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
 import { AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
+import env from "../env";
+
+// Shim Bun
+if (typeof global.Bun === "undefined") {
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const bcrypt = require("bcrypt");
+  global.Bun = {
+    password: {
+      hash: (password: string, { cost }: { cost: number }) =>
+        bcrypt.hash(password, cost),
+      verify: bcrypt.compare,
+    },
+  };
+}
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -68,7 +82,7 @@ process.on("unhandledRejection", (reason, p) => {
 });
 
 Honeybadger.configure({
-  apiKey: process.env.HONEYBADGER_API_KEY,
+  apiKey: env.HONEYBADGER_API_KEY,
   environment: __DEV__ ? "development" : "production",
 });
 
@@ -86,20 +100,19 @@ const accessLogStream = createStream("access.log", {
 
 const app: Application = express();
 
-let internalWsServer;
-if (process.env.USE_HTTPS === "true") {
+let server;
+if (env.USE_HTTPS === "true") {
   // use self-signed cert locally
   const options = {
     key: fs.readFileSync(path.join(__dirname, "../cert/server.key")),
     cert: fs.readFileSync(path.join(__dirname, "../cert/server.crt")),
   };
 
-  internalWsServer = https.createServer(options, app);
+  server = https.createServer(options, app);
 } else {
   // prod proxy will take care of https
-  internalWsServer = http.createServer(app);
+  server = http.createServer(app);
 }
-export const wsServer = internalWsServer;
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -126,7 +139,7 @@ app.get("/health", (req, res) => {
   res.status(200).send("welcome to the health endpoint");
 });
 
-if (process.env.NODE_ENV === "production") {
+if (env.NODE_ENV === "production") {
   app.use(
     enforce.HTTPS({
       trustProtoHeader: true,
@@ -134,9 +147,9 @@ if (process.env.NODE_ENV === "production") {
     })
   );
   app.set("trust proxy", true);
+  app.use(compression());
 }
 
-app.use(compression());
 app.use(express.static(path.resolve(__dirname, "public")));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -190,7 +203,7 @@ app.use(
   session({
     cookie: {
       domain: config.domain,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
     },
     saveUninitialized: false,
     secret: config.auth.session.secret,
@@ -282,7 +295,7 @@ app.get("/logout", (req, res, next) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wsInstance = expressWs(app, wsServer);
+const wsInstance = expressWs(app, server);
 export const wss = wsInstance.getWss();
 
 app.use((req, res, next) => {
@@ -475,7 +488,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
       error: true,
       data: {
         message: err.message,
-        stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+        stack: env.NODE_ENV !== "production" ? err.stack : undefined,
       },
     });
   }
@@ -486,21 +499,14 @@ app.use(errorHandler);
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-if (process.env.USE_HTTPS === "true") {
-  wsServer.listen(config.wsPort, () => {
-    /* eslint-disable no-console */
-    console.log(
-      `The websockets server is running at https://local.lunch.pink:${config.wsPort}/`
-    );
-  });
-} else {
-  wsServer.listen(config.port, () => {
-    /* eslint-disable no-console */
-    console.log(
-      `The server is running at http://local.lunch.pink:${config.port}/`
-    );
-  });
-}
+server.listen(config.port, () => {
+  /* eslint-disable no-console */
+  console.log(
+    `The server is running at http${
+      env.USE_HTTPS === "true" ? "s" : ""
+    }://local.lunch.pink:${config.port}/`
+  );
+});
 
 //
 // Hot Module Replacement

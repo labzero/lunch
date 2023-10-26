@@ -11,7 +11,7 @@
 
 import fs from "fs";
 import path from "path";
-import webpack from "webpack";
+import webpack, { Configuration, RuleSetRule } from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
 import nodeExternals from "webpack-node-externals";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
@@ -21,7 +21,7 @@ import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import overrideRules from "./lib/overrideRules";
 
 const ROOT_DIR = path.resolve(__dirname, "..");
-const resolvePath = (...args) => path.resolve(ROOT_DIR, ...args);
+const resolvePath = (...args: string[]) => path.resolve(ROOT_DIR, ...args);
 const SRC_DIR = resolvePath("src");
 const BUILD_DIR = resolvePath("build");
 
@@ -42,7 +42,7 @@ const staticAssetName = isDebug
 // client-side (client.tsx) and server-side (server.js) bundles
 // -----------------------------------------------------------------------------
 
-const config = {
+const config: Configuration = {
   context: ROOT_DIR,
 
   mode: isDebug ? "development" : "production",
@@ -55,7 +55,7 @@ const config = {
     chunkFilename: isDebug
       ? "[name].chunk.js"
       : "[name].[chunkhash:8].chunk.js",
-    devtoolModuleFilenameTemplate: (info) =>
+    devtoolModuleFilenameTemplate: (info: { absoluteResourcePath: string }) =>
       path.resolve(info.absoluteResourcePath),
   },
 
@@ -293,7 +293,7 @@ const config = {
 // Configuration for the client-side bundle (client.tsx)
 // -----------------------------------------------------------------------------
 
-const clientConfig = {
+export const clientConfig: Configuration = {
   ...config,
 
   name: "client",
@@ -304,7 +304,7 @@ const clientConfig = {
   },
 
   plugins: [
-    ...config.plugins,
+    ...config.plugins!,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
@@ -318,7 +318,7 @@ const clientConfig = {
       output: `${BUILD_DIR}/asset-manifest.json`,
       publicPath: true,
       writeToDisk: true,
-      customize: ({ key, value }) => {
+      customize: ({ key, value }: { key: string; value: string }) => {
         // You can prevent adding items to the manifest by returning false.
         if (key.toLowerCase().endsWith(".map")) return false;
         return { key, value };
@@ -327,19 +327,19 @@ const clientConfig = {
         // Write chunk-manifest.json.json
         const chunkFileName = `${BUILD_DIR}/chunk-manifest.json`;
         try {
-          const fileFilter = (file) => !file.endsWith(".map");
-          const addPath = (file) => manifest.getPublicPath(file);
+          const fileFilter = (file: string) => !file.endsWith(".map");
+          const addPath = (file: string) => manifest.getPublicPath(file);
           const chunkFiles = stats.compilation.chunkGroups.reduce(
             (acc, c) => ({
               ...acc,
-              [c.name]: [
-                ...(acc[c.name] || []),
+              [c.name!]: [
+                ...(acc[c.name!] || []),
                 ...c.chunks.reduce(
                   (files, cc) => [
                     ...files,
                     ...Array.from(cc.files).filter(fileFilter).map(addPath),
                   ],
-                  []
+                  [] as string[]
                 ),
               ],
             }),
@@ -389,7 +389,7 @@ const clientConfig = {
   resolve: {
     ...config.resolve,
     fallback: {
-      ...config.resolve.fallback,
+      ...config.resolve!.fallback,
       fs: "empty",
       net: "empty",
       tls: "empty",
@@ -401,7 +401,7 @@ const clientConfig = {
 // Configuration for the server-side bundle (server.js)
 // -----------------------------------------------------------------------------
 
-const serverConfig = {
+export const serverConfig: Configuration = {
   ...config,
 
   name: "server",
@@ -428,7 +428,7 @@ const serverConfig = {
   module: {
     ...config.module,
 
-    rules: overrideRules(config.module.rules, (rule) => {
+    rules: overrideRules(config.module!.rules, (rule: RuleSetRule) => {
       // Override paths to static assets
       if (
         rule.loader === "file-loader" ||
@@ -438,9 +438,11 @@ const serverConfig = {
         return {
           ...rule,
           options: {
-            ...rule.options,
-            name: `public/assets/${rule.options.name}`,
-            publicPath: (url) => url.replace(/^public/, ""),
+            ...(rule.options as { [index: string]: any }),
+            name: `public/assets/${
+              (rule.options as { [index: string]: any }).name as string
+            }`,
+            publicPath: (url: string) => url.replace(/^public/, ""),
           },
         };
       }
@@ -458,7 +460,7 @@ const serverConfig = {
   ],
 
   plugins: [
-    ...config.plugins,
+    ...config.plugins!,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 
-exports.up = ({ context: queryInterface }) =>
+export const up = ({ context: queryInterface }) =>
   queryInterface
     .addColumn("users", "superuser", {
       allowNull: false,
@@ -33,5 +33,5 @@ exports.up = ({ context: queryInterface }) =>
       );
     });
 
-exports.down = ({ context: queryInterface }) =>
+export const down = ({ context: queryInterface }) =>
   queryInterface.removeColumn("users", "superuser");

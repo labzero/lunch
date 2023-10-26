@@ -4,6 +4,7 @@ import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import { VNode } from "preact";
 import { ResolveContext } from "universal-router";
 import { WebSocket } from "ws";
+import { BrowserHistory } from "history";
 import { confirmableActions } from "./actions";
 import {
   Decision as DecisionModel,
@@ -72,6 +73,11 @@ export interface StateData {
   teams: TeamModel[];
   user: Express.User;
 }
+
+export interface StateHelpers {
+  history?: BrowserHistory;
+}
+
 export interface LatLng {
   lat: number;
   lng: number;
@@ -524,6 +530,7 @@ interface BaseState {
   pageUi: {
     shouldScrollToTop?: boolean;
   };
+  port: number;
   tagFilters: number[];
   tagExclusions: number[];
   tags: {
@@ -538,7 +545,6 @@ interface BaseState {
     isFetching: boolean;
     didInvalidate: boolean;
   };
-  wsPort: number;
 }
 
 export type State = BaseState & {
