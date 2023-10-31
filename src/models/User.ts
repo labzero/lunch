@@ -87,37 +87,37 @@ class User extends Model {
       ],
     });
 
-  @Column
+  @Column(DataType.STRING)
   googleId: string;
 
-  @Column
+  @Column(DataType.STRING)
   name: string;
 
   @Column({ type: DataType.CITEXT })
   email: string;
 
-  @Column
+  @Column(DataType.STRING)
   encryptedPassword?: string;
 
-  @Column
+  @Column(DataType.STRING)
   resetPasswordToken?: string;
 
-  @Column
+  @Column(DataType.DATE)
   resetPasswordSentAt?: Date;
 
-  @Column
+  @Column(DataType.STRING)
   confirmationToken?: string;
 
-  @Column
+  @Column(DataType.DATE)
   confirmationSentAt?: Date;
 
-  @Column
+  @Column(DataType.DATE)
   confirmedAt?: Date;
 
-  @Column
+  @Column(DataType.BOOLEAN)
   nameChanged: boolean;
 
-  @Column
+  @Column(DataType.BOOLEAN)
   superuser: boolean;
 
   @HasMany(() => Vote)

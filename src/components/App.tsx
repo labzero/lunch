@@ -90,13 +90,13 @@ class App extends React.PureComponent<AppProps> {
     // NOTE: If you need to add or modify header, footer etc. of the app,
     // please do that inside the Layout component.
     return (
-      <StyleContext.Provider value={this.styleContextValue}>
-        <ReduxProvider store={this.props.context.store}>
-          <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
+      <ReduxProvider store={this.props.context.store}>
+        <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
+          <StyleContext.Provider value={this.styleContextValue}>
             {this.props.children}
-          </GoogleMapsLoaderContext.Provider>
-        </ReduxProvider>
-      </StyleContext.Provider>
+          </StyleContext.Provider>
+        </GoogleMapsLoaderContext.Provider>
+      </ReduxProvider>
     );
   }
 }

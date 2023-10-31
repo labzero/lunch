@@ -1,6 +1,7 @@
 import {
   BelongsToMany,
   Column,
+  DataType,
   HasMany,
   Model,
   Table,
@@ -72,22 +73,22 @@ class Restaurant extends Model {
         : []
     );
 
-  @Column
+  @Column(DataType.STRING)
   name: string;
 
-  @Column
+  @Column(DataType.STRING)
   address: string;
 
-  @Column
+  @Column(DataType.INTEGER)
   lat: number;
 
-  @Column
+  @Column(DataType.INTEGER)
   lng: number;
 
-  @Column
+  @Column(DataType.STRING)
   placeId: string;
 
-  @Column
+  @Column(DataType.STRING)
   teamId: string;
 
   @HasMany(() => Vote)

@@ -493,4 +493,4 @@ export const serverConfig: Configuration = {
   },
 };
 
-export default [clientConfig, serverConfig];
+export default [clientConfig];

@@ -16,7 +16,7 @@ import User from "./User";
 class Role extends Model {
   @ForeignKey(() => User)
   @Index({ unique: true })
-  @Column({ allowNull: false, onDelete: "cascade" })
+  @Column({ allowNull: false, onDelete: "cascade", type: DataType.INTEGER })
   userId: number;
 
   @BelongsTo(() => User)
@@ -24,7 +24,7 @@ class Role extends Model {
 
   @ForeignKey(() => Team)
   @Index({ unique: true })
-  @Column({ allowNull: false, onDelete: "cascade" })
+  @Column({ allowNull: false, onDelete: "cascade", type: DataType.INTEGER })
   teamId: number;
 
   @BelongsTo(() => Team)

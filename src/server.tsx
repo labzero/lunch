@@ -17,7 +17,6 @@ import express, {
   RequestHandler,
 } from "express";
 import cors from "cors";
-import crypto from "crypto";
 import http from "http";
 import https from "https";
 import enforce from "express-sslify";
@@ -31,10 +30,8 @@ import connectSessionSequelize from "connect-session-sequelize";
 import flash from "connect-flash";
 import { expressjwt, UnauthorizedError as Jwt401Error } from "express-jwt";
 import React from "react";
-import ReactDOM from "react-dom/server";
 import expressWs from "express-ws";
 import Honeybadger from "@honeybadger-io/js";
-import prepass from "preact-ssr-prepass";
 import PrettyError from "pretty-error";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import App from "./components/App";
@@ -49,7 +46,7 @@ import passport from "./passport";
 import routerCreator from "./router";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import chunks from "./chunk-manifest.json"; // eslint-disable-line import/no-unresolved
+import chunks from "../build/chunk-manifest.json"; // eslint-disable-line import/no-unresolved
 import configureStore from "./store/configureStore";
 import * as config from "./config";
 import makeInitialState from "./initialState";
@@ -61,6 +58,13 @@ import api from "./api";
 import { sequelize, Team, User } from "./db";
 import { AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
 import env from "../env";
+
+const prepass = require("preact-ssr-prepass");
+const renderToString = require("preact-render-to-string");
+const renderToStaticMarkup = renderToString;
+
+// eslint-disable-next-line no-underscore-dangle
+const __DEV__ = env.NODE_ENV !== "production";
 
 // Shim Bun
 if (typeof global.Bun === "undefined") {
@@ -91,12 +95,6 @@ const logDirectory = path.join(__dirname, "log");
 // ensure log directory exists
 // eslint-disable-next-line no-unused-expressions
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
-
-// create a rotating write stream
-const accessLogStream = createStream("access.log", {
-  interval: "1d", // rotate daily
-  path: logDirectory,
-});
 
 const app: Application = express();
 
@@ -133,13 +131,21 @@ app.set("trust proxy", config.trustProxy);
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
 app.use(Honeybadger.requestHandler); // Use *before* all other app middleware.
-app.use(morgan("combined", { stream: accessLogStream }));
+
+if (!__DEV__) {
+  // create a rotating write stream
+  const accessLogStream = createStream("access.log", {
+    interval: "1d", // rotate daily
+    path: logDirectory,
+  });
+  app.use(morgan("combined", { stream: accessLogStream }));
+}
 
 app.get("/health", (req, res) => {
   res.status(200).send("welcome to the health endpoint");
 });
 
-if (env.NODE_ENV === "production") {
+if (!__DEV__) {
   app.use(
     enforce.HTTPS({
       trustProtoHeader: true,
@@ -150,7 +156,7 @@ if (env.NODE_ENV === "production") {
   app.use(compression());
 }
 
-app.use(express.static(path.resolve(__dirname, "public")));
+app.use(express.static(path.resolve(__dirname, "../build/public")));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -406,12 +412,12 @@ const render: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const pageTitle = route.title || "Lunch";
+    const pageTitle = route?.title || "Lunch";
 
     const data: HtmlProps = {
-      ...route,
+      // ...route,
       title: pageTitle,
-      ogTitle: route.ogTitle || pageTitle,
+      ogTitle: route?.ogTitle || pageTitle,
       description:
         "A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!",
       children: "",
@@ -422,7 +428,7 @@ const render: RequestHandler = async (req, res, next) => {
 
     await prepass(vdom);
 
-    data.children = ReactDOM.renderToString(vdom);
+    data.children = renderToString(vdom);
     data.styles = [{ id: "css", cssText: [...css].join("") }];
 
     const scripts = new Set<string>();
@@ -444,8 +450,8 @@ const render: RequestHandler = async (req, res, next) => {
       state: initialState,
     };
 
-    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-    res.status(route.status || 200);
+    const html = renderToStaticMarkup(<Html {...data} />);
+    res.status(route?.status || 200);
     res.send(`<!doctype html>${html}`);
   } catch (err) {
     next(err);
@@ -469,17 +475,17 @@ pe.skipPackage("express");
 app.use(Honeybadger.errorHandler); // Use *after* all other app middleware.
 
 // eslint-disable-next-line no-unused-vars
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+const errorHandler: ErrorRequestHandler = (err, req, res) => {
   console.error(pe.render(err));
   res.status(err.status || 500);
   if (req.accepts("html") === "html") {
-    const html = ReactDOM.renderToStaticMarkup(
+    const html = renderToStaticMarkup(
       <Html
         title="Internal Server Error"
         description={err.message}
         styles={[{ id: "css", cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
       >
-        {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
+        {renderToString(<ErrorPageWithoutStyle error={err} />)}
       </Html>
     );
     res.send(`<!doctype html>${html}`);

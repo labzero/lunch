@@ -8,7 +8,7 @@
  */
 
 import React, { Component, HTMLAttributes } from "react";
-import { ComponentChildren } from "preact";
+import type { ComponentChildren } from "preact";
 import history from "../../history";
 
 function isLeftClickEvent(event: MouseEvent) {

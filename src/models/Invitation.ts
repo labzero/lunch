@@ -5,13 +5,13 @@ class Invitation extends Model {
   @Column({ allowNull: false, type: DataType.CITEXT, unique: true })
   email: string;
 
-  @Column
+  @Column(DataType.DATE)
   confirmedAt: Date;
 
-  @Column({ unique: true })
+  @Column({ type: DataType.STRING, unique: true })
   confirmationToken: string;
 
-  @Column
+  @Column(DataType.DATE)
   confirmationSentAt: Date;
 }
 

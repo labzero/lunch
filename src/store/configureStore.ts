@@ -74,8 +74,13 @@ export default function configureStore(
       }),
   });
 
+  if (typeof global.__DEV__ === undefined) {
+    // eslint-disable-next-line no-underscore-dangle
+    global.__DEV__ = process.env.NODE_ENV !== "production";
+  }
+
   // Hot reload reducers (requires Webpack or Browserify HMR to be enabled)
-  if (__DEV__ && module.hot) {
+  if (global.__DEV__ && module.hot) {
     module.hot.accept("../reducers", () => {
       // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
       const newReducers = require("../reducers");

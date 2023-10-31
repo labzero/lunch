@@ -1,5 +1,4 @@
 declare const __webpack_public_path__: string;
-declare const __DEV__: boolean;
 
 /// <reference types="webpack-env" />
 /// <reference types="chai-jsdom" />
@@ -10,6 +9,8 @@ declare interface Window {
 
 namespace global {
   let Bun: { [index: string]: any } | undefined;
+  // eslint-disable-next-line no-underscore-dangle
+  let __DEV__: boolean;
 }
 
 type Dispose = () => void;

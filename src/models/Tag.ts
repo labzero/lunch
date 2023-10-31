@@ -1,6 +1,7 @@
 import {
   BelongsToMany,
   Column,
+  DataType,
   ForeignKey,
   HasMany,
   Model,
@@ -35,11 +36,11 @@ import Team from "./Team";
 }))
 @Table({ modelName: "tag" })
 class Tag extends Model {
-  @Column
+  @Column(DataType.STRING)
   name: string;
 
   @ForeignKey(() => Team)
-  @Column
+  @Column(DataType.INTEGER)
   teamId: number;
 
   @HasMany(() => RestaurantTag)

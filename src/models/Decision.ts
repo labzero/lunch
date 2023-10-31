@@ -1,6 +1,7 @@
 import {
   BelongsTo,
   Column,
+  DataType,
   ForeignKey,
   Index,
   Model,
@@ -25,18 +26,18 @@ import Team from "./Team";
 class Decision extends Model {
   @ForeignKey(() => Restaurant)
   @Index
-  @Column({ allowNull: false, onDelete: "cascade" })
+  @Column({ allowNull: false, onDelete: "cascade", type: DataType.INTEGER })
   restaurantId: number;
 
   @BelongsTo(() => Restaurant)
   restaurant: Awaited<Restaurant>;
 
   @ForeignKey(() => Team)
-  @Column
+  @Column(DataType.INTEGER)
   teamId: number;
 
   @Index
-  @Column
+  @Column(DataType.DATE)
   createdAt: Date;
 }
 

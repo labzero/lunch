@@ -21,16 +21,16 @@ class Team extends Model {
       },
     });
 
-  @Column
+  @Column(DataType.STRING)
   name: string;
 
   @Column({ allowNull: false, type: DataType.STRING({ length: 63 }) })
   slug: string;
 
-  @Column
+  @Column(DataType.INTEGER)
   defaultZoom: number;
 
-  @Column
+  @Column(DataType.INTEGER)
   sortDuration: number;
 
   @Column({ allowNull: false, type: DataType.DOUBLE })
@@ -39,7 +39,7 @@ class Team extends Model {
   @Column({ allowNull: false, type: DataType.DOUBLE })
   lng: number;
 
-  @Column
+  @Column(DataType.STRING)
   address: string;
 
   @Index

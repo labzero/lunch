@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentChildren } from "preact";
+import type { ComponentChildren } from "preact";
 import Modal from "react-bootstrap/Modal";
 import ModalBody from "react-bootstrap/ModalBody";
 import ModalFooter from "react-bootstrap/ModalFooter";

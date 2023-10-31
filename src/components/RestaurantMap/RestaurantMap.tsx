@@ -2,7 +2,7 @@
 
 import PropTypes from "prop-types";
 import React, { Component, Suspense, lazy } from "react";
-import { VNode } from "preact";
+import type { VNode } from "preact";
 import withStyles from "isomorphic-style-loader/withStyles";
 import { GOOGLE_MAP_ZOOM } from "../../constants";
 import googleMapOptions from "../../helpers/googleMapOptions";

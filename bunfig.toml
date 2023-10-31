@@ -1,0 +1,1 @@
+preload = ["./src/plugins/sass.ts", "./src/plugins/image.ts"]

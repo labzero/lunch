@@ -1,6 +1,7 @@
 import {
   BelongsTo,
   Column,
+  DataType,
   ForeignKey,
   Index,
   Model,
@@ -38,7 +39,7 @@ class Vote extends Model {
 
   @ForeignKey(() => User)
   @Index
-  @Column({ allowNull: false })
+  @Column({ allowNull: false, type: DataType.INTEGER })
   userId: number;
 
   @BelongsTo(() => User)
@@ -46,7 +47,7 @@ class Vote extends Model {
 
   @ForeignKey(() => Restaurant)
   @Index
-  @Column({ allowNull: false, onDelete: "cascade" })
+  @Column({ allowNull: false, onDelete: "cascade", type: DataType.INTEGER })
   restaurantId: number;
 
   @BelongsTo(() => Restaurant)

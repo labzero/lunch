@@ -1,6 +1,7 @@
 import {
   BelongsTo,
   Column,
+  DataType,
   ForeignKey,
   Index,
   Model,
@@ -15,7 +16,7 @@ class RestaurantTag extends Model {
   @PrimaryKey
   @ForeignKey(() => Restaurant)
   @Index({ unique: true })
-  @Column
+  @Column(DataType.INTEGER)
   restaurantId: number;
 
   @BelongsTo(() => Restaurant)
@@ -24,7 +25,7 @@ class RestaurantTag extends Model {
   @PrimaryKey
   @ForeignKey(() => Tag)
   @Index({ unique: true })
-  @Column
+  @Column(DataType.INTEGER)
   tagId: number;
 
   @BelongsTo(() => Tag)

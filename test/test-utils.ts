@@ -1,4 +1,4 @@
-import { VNode } from "preact";
+import type { VNode } from "preact";
 import { render, RenderOptions } from "@testing-library/react";
 
 const AllTheProviders = ({ children }: { children: VNode }) => children;

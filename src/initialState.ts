@@ -45,7 +45,7 @@ const getInitialState = (): NonNormalizedState => ({
     didInvalidate: true,
     items: [],
   },
-  port: module.hot ? port : 0,
+  port: process.env.NODE_ENV === "production" ? 0 : port,
 });
 
 export default (stateData: StateData) => {

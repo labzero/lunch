@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 import { scrolledToTop } from "../../actions/pageUi";
-import { Dispatch, State } from "../../interfaces";
+import { State } from "../../interfaces";
 import Layout, { LayoutProps } from "./Layout";
 
 const mapStateToProps = (
@@ -12,10 +12,8 @@ const mapStateToProps = (
   ...ownProps,
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  scrolledToTop() {
-    dispatch(scrolledToTop());
-  },
-});
+const mapDispatchToProps = {
+  scrolledToTop,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Layout);

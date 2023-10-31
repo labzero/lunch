@@ -28,18 +28,20 @@ async function copy() {
           engines: pkg.engines,
           dependencies: pkg.dependencies,
           scripts: {
-            start: "node server.js",
+            start: "bun server.tsx",
           },
         },
         null,
         2
       )
     ),
+
     copyFile("LICENSE.txt", "build/LICENSE.txt"),
     copyFile("yarn.lock", "build/yarn.lock"),
     copyDir("public", "build/public"),
     copyFile("database.js", "build/database.js"),
     copyFile(".sequelizerc", "build/.sequelizerc"),
+    copyFile("src/server.tsx", "build/server.tsx"),
     copyDir("cert", "build/cert"),
   ]);
 
