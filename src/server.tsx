@@ -59,6 +59,7 @@ import { sequelize, Team, User } from "./db";
 import { AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
 import env from "../env";
 
+// require instead of importing to get CJS version, which third-party code uses
 const prepass = require("preact-ssr-prepass");
 const renderToString = require("preact-render-to-string");
 const renderToStaticMarkup = renderToString;

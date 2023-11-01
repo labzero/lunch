@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === "test") {
   });
 }
 
-Object.entries(results).forEach(([key, value]) => {
+Object.entries(results.parsed!).forEach(([key, value]) => {
   process.env[key] = value;
   env[key] = value;
 });

@@ -10,22 +10,15 @@
 /* eslint-disable no-promise-executor-return */
 
 import { Application } from "express";
-import path from "path";
-import { serverConfig } from "./webpack.config";
 import "../env";
 
 let server: Application;
-const serverPath = path.join(
-  serverConfig.output!.path!,
-  (serverConfig.output!.filename as string).replace("[name]", "server")
-);
 
 // Launch or restart the Node.js server
 async function runServer() {
-  // eslint-disable-next-line
-  server = require(serverPath).default;
-
-  return server;
+  if (!server) {
+    server = (await import("../src/server.tsx")).default;
+  }
 }
 
 export default runServer;
