@@ -3005,16 +3005,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack-node-externals@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "@types/webpack-node-externals@npm:3.0.3"
-  dependencies:
-    "@types/node": "*"
-    webpack: ^5
-  checksum: 0153ffdea20bf5b4728ac45f7e959b41deabd8226f4741a1542b1ce7259b04717b2a766a240629b7307a211ed7205dff6bb2e2b85d8450970162ab9fed809fe6
-  languageName: node
-  linkType: hard
-
 "@types/webpack-sources@npm:*":
   version: 3.2.2
   resolution: "@types/webpack-sources@npm:3.2.2"
@@ -9670,7 +9660,6 @@ __metadata:
     "@types/webpack-bundle-analyzer": ^4.6.2
     "@types/webpack-env": ^1.18.0
     "@types/webpack-hot-middleware": ^2.25.8
-    "@types/webpack-node-externals": ^3.0.3
     "@typescript-eslint/eslint-plugin": ^5.59.1
     "@typescript-eslint/parser": ^5.59.1
     "@ubilabs/react-geosuggest": ^2.16.1
@@ -9794,7 +9783,6 @@ __metadata:
     webpack-bundle-analyzer: ^4.8.0
     webpack-cli: ^5.0.1
     webpack-hot-middleware: ^2.25.3
-    webpack-node-externals: ^3.0.0
     workbox-webpack-plugin: ^7.0.0
   languageName: unknown
   linkType: soft
@@ -14983,13 +14971,6 @@ __metadata:
     flat: ^5.0.2
     wildcard: ^2.0.0
   checksum: 1fe8bf5309add7298e1ac72fb3f2090e1dfa80c48c7e79fa48aa60b5961332c7d0d61efa8851acb805e6b91a4584537a347bc106e05e9aec87fa4f7088c62f2f
-  languageName: node
-  linkType: hard
-
-"webpack-node-externals@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "webpack-node-externals@npm:3.0.0"
-  checksum: 355080c35c821115b97dda8c93d9d0565a90a6012a532324eb0d6a64f8f0d609431fd29504fc7ce414755841ac14f601f3eef99472c2c5dc00233b504ebe73f2
   languageName: node
   linkType: hard
 

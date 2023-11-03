@@ -11,14 +11,12 @@
 
 import fs from "fs";
 import path from "path";
-import webpack, { Configuration, RuleSetRule } from "webpack";
+import webpack, { Configuration } from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
-import nodeExternals from "webpack-node-externals";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
 // import { InjectManifest } from "workbox-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
-import overrideRules from "./lib/overrideRules";
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const resolvePath = (...args: string[]) => path.resolve(ROOT_DIR, ...args);
@@ -42,10 +40,17 @@ const staticAssetName = isDebug
 // client-side (client.tsx) and server-side (server.js) bundles
 // -----------------------------------------------------------------------------
 
-const config: Configuration = {
+export const clientConfig: Configuration = {
+  name: "client",
+  target: "web",
+
   context: ROOT_DIR,
 
   mode: isDebug ? "development" : "production",
+
+  entry: {
+    client: "./src/client.tsx",
+  },
 
   output: {
     path: resolvePath(BUILD_DIR, "public/assets"),
@@ -79,6 +84,9 @@ const config: Configuration = {
       console: false,
       crypto: false,
       process: false,
+      fs: "empty",
+      net: "empty",
+      tls: "empty",
     },
   },
 
@@ -273,38 +281,6 @@ const config: Configuration = {
           sockIntegration: "whm",
         },
       }),
-  ].filter(Boolean),
-
-  // Don't attempt to continue if there are any errors.
-  bail: !isDebug,
-
-  cache: isDebug,
-
-  // Specify what bundle information gets displayed
-  // https://webpack.js.org/configuration/stats/
-  stats: "errors-warnings",
-
-  // Choose a developer tool to enhance debugging
-  // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? "inline-source-map" : "source-map",
-};
-
-//
-// Configuration for the client-side bundle (client.tsx)
-// -----------------------------------------------------------------------------
-
-export const clientConfig: Configuration = {
-  ...config,
-
-  name: "client",
-  target: "web",
-
-  entry: {
-    client: "./src/client.tsx",
-  },
-
-  plugins: [
-    ...config.plugins!,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
@@ -353,20 +329,18 @@ export const clientConfig: Configuration = {
       },
     }),
 
-    ...(isDebug
-      ? []
-      : [
-          // Webpack Bundle Analyzer
-          // https://github.com/th0r/webpack-bundle-analyzer
-          ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
-        ]),
+    isDebug &&
+      isAnalyze &&
+      // Webpack Bundle Analyzer
+      // https://github.com/th0r/webpack-bundle-analyzer
+      new BundleAnalyzerPlugin(),
 
     // TODO: this makes Bun die
     /* new InjectManifest({
       swSrc: "./src/service-worker.js",
       swDest: resolvePath(BUILD_DIR, "public/service-worker.js"),
     }), */
-  ],
+  ].filter(Boolean),
 
   // Move modules that occur in multiple entry chunks to a new entry chunk (the commons chunk).
   optimization: {
@@ -382,115 +356,18 @@ export const clientConfig: Configuration = {
     },
   },
 
-  // Some libraries import Node modules but don't use them in the browser.
-  // Tell Webpack to provide empty mocks for them so importing them works.
-  // https://webpack.js.org/configuration/node/
-  // https://github.com/webpack/node-libs-browser/tree/master/mock
-  resolve: {
-    ...config.resolve,
-    fallback: {
-      ...config.resolve!.fallback,
-      fs: "empty",
-      net: "empty",
-      tls: "empty",
-    },
-  },
-};
+  // Don't attempt to continue if there are any errors.
+  bail: !isDebug,
 
-//
-// Configuration for the server-side bundle (server.js)
-// -----------------------------------------------------------------------------
+  cache: isDebug,
 
-export const serverConfig: Configuration = {
-  ...config,
+  // Specify what bundle information gets displayed
+  // https://webpack.js.org/configuration/stats/
+  stats: "errors-warnings",
 
-  name: "server",
-  target: "node",
-
-  entry: {
-    server: "./src/server.tsx",
-  },
-
-  output: {
-    ...config.output,
-    path: BUILD_DIR,
-    filename: "[name].js",
-    chunkFilename: "chunks/[name].js",
-    libraryTarget: "commonjs2",
-  },
-
-  // Webpack mutates resolve object, so clone it to avoid issues
-  // https://github.com/webpack/webpack/issues/4817
-  resolve: {
-    ...config.resolve,
-  },
-
-  module: {
-    ...config.module,
-
-    rules: overrideRules(config.module!.rules, (rule: RuleSetRule) => {
-      // Override paths to static assets
-      if (
-        rule.loader === "file-loader" ||
-        rule.loader === "url-loader" ||
-        rule.loader === "svg-url-loader"
-      ) {
-        return {
-          ...rule,
-          options: {
-            ...(rule.options as { [index: string]: any }),
-            name: `public/assets/${
-              (rule.options as { [index: string]: any }).name as string
-            }`,
-            publicPath: (url: string) => url.replace(/^public/, ""),
-          },
-        };
-      }
-
-      return rule;
-    }),
-  },
-
-  externals: [
-    "./chunk-manifest.json",
-    "./asset-manifest.json",
-    nodeExternals({
-      allowlist: [reStyle, reImage],
-    }),
-  ],
-
-  plugins: [
-    ...config.plugins!,
-    // Define free variables
-    // https://webpack.js.org/plugins/define-plugin/
-    new webpack.DefinePlugin({
-      // eslint-disable-next-line no-nested-ternary
-      "process.env.NODE_ENV":
-        process.env.NODE_ENV === "test"
-          ? '"test"'
-          : isDebug
-          ? '"development"'
-          : '"production"',
-      "process.env.BROWSER": false,
-      __DEV__: isDebug,
-    }),
-
-    // Adds a banner to the top of each generated chunk
-    // https://webpack.js.org/plugins/banner-plugin/
-    new webpack.BannerPlugin({
-      banner: 'require("source-map-support").install();',
-      raw: true,
-      entryOnly: false,
-    }),
-  ],
-
-  // Do not replace node globals with polyfills
-  // https://webpack.js.org/configuration/node/
-  node: {
-    global: false,
-    __filename: false,
-    __dirname: false,
-  },
+  // Choose a developer tool to enhance debugging
+  // https://webpack.js.org/configuration/devtool/#devtool
+  devtool: isDebug ? "inline-source-map" : "source-map",
 };
 
 export default [clientConfig];
