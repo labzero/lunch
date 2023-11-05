@@ -417,6 +417,7 @@ const render: RequestHandler = async (req, res, next) => {
 
     const data: HtmlProps = {
       // ...route,
+      __DEV__,
       title: pageTitle,
       ogTitle: route?.ogTitle || pageTitle,
       description:

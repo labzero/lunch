@@ -14,7 +14,7 @@ import path from "path";
 import webpack, { Configuration } from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
-// import { InjectManifest } from "workbox-webpack-plugin";
+import { InjectManifest } from "workbox-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 
@@ -335,11 +335,10 @@ export const clientConfig: Configuration = {
       // https://github.com/th0r/webpack-bundle-analyzer
       new BundleAnalyzerPlugin(),
 
-    // TODO: this makes Bun die
-    /* new InjectManifest({
+    new InjectManifest({
       swSrc: "./src/service-worker.js",
       swDest: resolvePath(BUILD_DIR, "public/service-worker.js"),
-    }), */
+    }),
   ].filter(Boolean),
 
   // Move modules that occur in multiple entry chunks to a new entry chunk (the commons chunk).
@@ -364,10 +363,6 @@ export const clientConfig: Configuration = {
   // Specify what bundle information gets displayed
   // https://webpack.js.org/configuration/stats/
   stats: "errors-warnings",
-
-  // Choose a developer tool to enhance debugging
-  // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? "inline-source-map" : "source-map",
 };
 
 export default [clientConfig];

@@ -15,6 +15,7 @@ import { App } from "../interfaces";
 /* eslint-disable react/no-danger */
 
 export interface HtmlProps {
+  __DEV__: boolean;
   app?: App;
   title: string;
   ogTitle?: string;
@@ -36,6 +37,7 @@ class Html extends Component<HtmlProps> {
 
   render() {
     const {
+      __DEV__,
       app,
       title,
       ogTitle,
@@ -110,14 +112,14 @@ gtag('config', '${config.analytics.googleMeasurementId}');
           <script
             dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }}
           />
-          {/* !module.hot && (
+          {!__DEV__ && (
             <script
               dangerouslySetInnerHTML={{
                 __html:
                   "if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js').then(function(registration) {registration.addEventListener('updatefound', () => {window.swUpdate = true; }); }); }); }",
               }}
             />
-            ) */}
+          )}
           {scripts!.map((script) => (
             <script key={script} src={script} />
           ))}
