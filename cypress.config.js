@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const { defineConfig } = require("cypress");
-require("dotenv").config({ path: "./.env.test" });
+require("./env");
 
 const protocol = process.env.USE_HTTPS === "true" ? "https://" : "http://";
 
