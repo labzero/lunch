@@ -1,6 +1,6 @@
-import "react-geosuggest";
+import "@ubilabs/react-geosuggest";
 
-declare module "react-geosuggest" {
+declare module "@ubilabs/react-geosuggest" {
   export interface Suggest {
     description: string;
     place_id: string;

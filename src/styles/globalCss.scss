@@ -1,6 +1,6 @@
 /* stylelint-disable selector-class-pattern */
 
-@import "~react-geosuggest/module/geosuggest.css";
+@import "~@ubilabs/react-geosuggest/module/geosuggest.css";
 @import "./variables";
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
@@ -19,6 +19,7 @@
 @import "~bootstrap/scss/nav";
 @import "~bootstrap/scss/list-group";
 @import "~bootstrap/scss/modal";
+@import "~bootstrap/scss/popover";
 @import "~bootstrap/scss/helpers/visually-hidden";
 @import "~bootstrap/scss/utilities/api";
 
