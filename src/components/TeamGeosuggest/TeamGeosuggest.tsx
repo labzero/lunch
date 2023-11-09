@@ -40,7 +40,7 @@ class TeamGeosuggest extends Component<TeamGeosuggestProps> {
     }
   }
 
-  getCoordsForMarker = (suggest: Suggest) => {
+  getCoordsForMarker = (suggest: Suggest | null) => {
     if (suggest !== null) {
       if (this.geocoder === undefined) {
         this.geocoder = new this.maps.Geocoder();
@@ -58,8 +58,8 @@ class TeamGeosuggest extends Component<TeamGeosuggestProps> {
     }
   };
 
-  handleSuggestSelect = (suggestion: Suggest) => {
-    if (suggestion) {
+  handleSuggestSelect = (suggestion?: Suggest) => {
+    if (suggestion?.location) {
       this.props.setCenter(suggestion.location);
     }
   };

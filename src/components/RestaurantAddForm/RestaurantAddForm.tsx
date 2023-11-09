@@ -1,10 +1,7 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
-import GeosuggestClass, {
-  GeosuggestProps,
-  Suggest,
-} from "@ubilabs/react-geosuggest";
+import GeosuggestClass, { Location, Suggest } from "@ubilabs/react-geosuggest";
 import withStyles from "isomorphic-style-loader/withStyles";
 import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
@@ -17,25 +14,17 @@ const Geosuggest = lazy(
   () => import(/* webpackChunkName: 'geosuggest' */ "@ubilabs/react-geosuggest")
 );
 
-interface RestaurantAddFormProps
-  extends Pick<GeosuggestProps, "getSuggestLabel"> {
+interface RestaurantAddFormProps {
   createTempMarker: (result: google.maps.GeocoderResult) => void;
   clearTempMarker: () => void;
-  handleSuggestSelect: (
-    suggestion: Suggest,
-    geosuggest: GeosuggestClass
-  ) => void;
+  getSuggestLabel: (
+    suggest: google.maps.places.AutocompletePrediction
+  ) => string;
+  handleSuggestSelect: (suggestion?: Location) => void;
   latLng: LatLng;
 }
 
-interface RestaurantAddFormState {
-  value: string;
-}
-
-class RestaurantAddForm extends Component<
-  RestaurantAddFormProps,
-  RestaurantAddFormState
-> {
+class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   static contextType = GoogleMapsLoaderContext;
 
   geocoder: google.maps.Geocoder;
@@ -52,10 +41,6 @@ class RestaurantAddForm extends Component<
 
     this.geosuggest = createRef();
 
-    this.state = {
-      value: "",
-    };
-
     if (canUseDOM) {
       const { loader } = context;
       loader?.load().then((google) => {
@@ -65,7 +50,7 @@ class RestaurantAddForm extends Component<
     }
   }
 
-  getCoordsForMarker = (suggest: Suggest) => {
+  getCoordsForMarker = (suggest: Suggest | null) => {
     if (suggest !== null) {
       if (this.geocoder === undefined) {
         this.geocoder = new this.maps.Geocoder();
@@ -78,11 +63,7 @@ class RestaurantAddForm extends Component<
     }
   };
 
-  handleChange = (value: string) => {
-    this.setState({ value });
-  };
-
-  handleSuggestSelect = (suggestion: Suggest) => {
+  handleSuggestSelect = (suggestion?: Location) => {
     this.props.handleSuggestSelect(suggestion);
     this.geosuggest.current?.clear();
     this.geosuggest.current?.focus();
@@ -113,11 +94,9 @@ class RestaurantAddForm extends Component<
               placeholder="Add places"
               onBlur={this.props.clearTempMarker}
               onActivateSuggest={this.getCoordsForMarker}
-              onChange={this.handleChange}
               onSuggestSelect={this.handleSuggestSelect}
               getSuggestLabel={this.props.getSuggestLabel}
               ref={this.geosuggest}
-              value={this.state.value}
             />
           </Suspense>
         ) : null}
