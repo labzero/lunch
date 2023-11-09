@@ -1,5 +1,5 @@
 import React, { Component, Suspense, lazy } from "react";
-import { Suggest } from "react-geosuggest";
+import { Suggest } from "@ubilabs/react-geosuggest";
 import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext, {
@@ -7,7 +7,7 @@ import GoogleMapsLoaderContext, {
 } from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
 const Geosuggest = lazy(
-  () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+  () => import(/* webpackChunkName: 'geosuggest' */ "@ubilabs/react-geosuggest")
 );
 
 export interface TeamGeosuggestProps {

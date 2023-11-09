@@ -1,4 +1,4 @@
-import Geosuggest, { Suggest } from "react-geosuggest";
+import Geosuggest, { Suggest } from "@ubilabs/react-geosuggest";
 import { connect } from "react-redux";
 import { scroller } from "react-scroll";
 import { Dispatch, State } from "../../interfaces";
@@ -47,10 +47,7 @@ const mergeProps = (
 ) => ({
   ...stateProps,
   ...dispatchProps,
-  handleSuggestSelect: (
-    suggestion: Suggest | undefined,
-    geosuggest: Geosuggest
-  ) => {
+  handleSuggestSelect: (suggestion: Suggest | undefined) => {
     if (suggestion) {
       let name = suggestion.label;
       let address = "";
@@ -70,8 +67,6 @@ const mergeProps = (
         address = suggestion.gmaps.formatted_address;
       }
       suggestCache = {};
-      geosuggest.update("");
-      geosuggest.showSuggests();
       const existingRestaurant = stateProps.restaurants.find(
         (r) => r.placeId === placeId
       );

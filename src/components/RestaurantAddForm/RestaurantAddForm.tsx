@@ -1,7 +1,10 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
-import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
+import GeosuggestClass, {
+  GeosuggestProps,
+  Suggest,
+} from "@ubilabs/react-geosuggest";
 import withStyles from "isomorphic-style-loader/withStyles";
 import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
@@ -11,7 +14,7 @@ import GoogleMapsLoaderContext, {
 import s from "./RestaurantAddForm.scss";
 
 const Geosuggest = lazy(
-  () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+  () => import(/* webpackChunkName: 'geosuggest' */ "@ubilabs/react-geosuggest")
 );
 
 interface RestaurantAddFormProps
@@ -25,7 +28,14 @@ interface RestaurantAddFormProps
   latLng: LatLng;
 }
 
-class RestaurantAddForm extends Component<RestaurantAddFormProps> {
+interface RestaurantAddFormState {
+  value: string;
+}
+
+class RestaurantAddForm extends Component<
+  RestaurantAddFormProps,
+  RestaurantAddFormState
+> {
   static contextType = GoogleMapsLoaderContext;
 
   geocoder: google.maps.Geocoder;
@@ -41,6 +51,10 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     super(props, context);
 
     this.geosuggest = createRef();
+
+    this.state = {
+      value: "",
+    };
 
     if (canUseDOM) {
       const { loader } = context;
@@ -64,8 +78,12 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     }
   };
 
+  handleChange = (value: string) => {
+    this.setState({ value });
+  };
+
   handleSuggestSelect = (suggestion: Suggest) => {
-    this.props.handleSuggestSelect(suggestion, this.geosuggest!.current!);
+    this.props.handleSuggestSelect(suggestion);
     this.geosuggest.current?.clear();
     this.geosuggest.current?.focus();
   };
@@ -95,9 +113,11 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
               placeholder="Add places"
               onBlur={this.props.clearTempMarker}
               onActivateSuggest={this.getCoordsForMarker}
+              onChange={this.handleChange}
               onSuggestSelect={this.handleSuggestSelect}
               getSuggestLabel={this.props.getSuggestLabel}
               ref={this.geosuggest}
+              value={this.state.value}
             />
           </Suspense>
         ) : null}

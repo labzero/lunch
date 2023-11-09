@@ -2959,6 +2959,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ubilabs/react-geosuggest@npm:^2.16.1":
+  version: 2.16.1
+  resolution: "@ubilabs/react-geosuggest@npm:2.16.1"
+  dependencies:
+    classnames: ^2.3.2
+    lodash.debounce: ^4.0.6
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 903d55fdfe8005104a96e8ea33a1963d21ad4527f61bbf973e1dc6d0863dd8da641dc37c82b3052e1efc5f876d48d3a40503015266e32c620b8dbd39163197f7
+  languageName: node
+  linkType: hard
+
 "@webassemblyjs/ast@npm:1.11.1":
   version: 1.11.1
   resolution: "@webassemblyjs/ast@npm:1.11.1"
@@ -4306,7 +4319,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:^2.2.6, classnames@npm:^2.3.1":
+"classnames@npm:^2.2.6, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 2c62199789618d95545c872787137262e741f9db13328e216b093eea91c85ef2bfb152c1f9e63027204e2559a006a92eb74147d46c800a9f96297ae1d9f96f4e
@@ -9274,6 +9287,7 @@ __metadata:
     "@types/webpack-env": ^1.18.0
     "@typescript-eslint/eslint-plugin": ^5.59.1
     "@typescript-eslint/parser": ^5.59.1
+    "@ubilabs/react-geosuggest": ^2.16.1
     autoprefixer: ^9.1.5
     bcrypt: ^5.1.0
     body-parser: ^1.18.3
@@ -9355,7 +9369,6 @@ __metadata:
     react-dom: "npm:@preact/compat@*"
     react-error-overlay: ^4.0.1
     react-flip-toolkit: ^7.0.17
-    react-geosuggest: ^2.14.1
     react-icons: ^4.7.1
     react-redux: ^8.0.5
     react-refresh: ^0.14.0
@@ -11566,19 +11579,6 @@ __metadata:
     react: ">= 16.x"
     react-dom: ">= 16.x"
   checksum: 81770ed1ac2289b0d060d8bfde14e57517cf48e7c9b1ca16b9d8148456c7b87a258dcb0236ac63e805761014031bd6421c3e13d0de8caae58e1f54d2880c8e0a
-  languageName: node
-  linkType: hard
-
-"react-geosuggest@npm:^2.14.1":
-  version: 2.14.1
-  resolution: "react-geosuggest@npm:2.14.1"
-  dependencies:
-    classnames: ^2.2.6
-    lodash.debounce: ^4.0.6
-  peerDependencies:
-    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: ce08966519dd1c7f2e4826588b91f809daf105819fdb8c8925333e0c0c4be07aa6db0a303b24c7d5d59e08f5c0aaeab437ca76fd8e3919813b1d781a72e1c66b
   languageName: node
   linkType: hard
 
