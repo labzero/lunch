@@ -92,12 +92,6 @@ jobs:
           environment:
             MOCHA_FILE: junit/unit-test-results.xml
 
-      # set up for integration tests
-      # set up the database
-      - run:
-          name: database-setup
-          command: NODE_ENV=test npm run integration-setup
-
       - run:
           name: setup /etc/hosts
           command: |

@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
-import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
+import GeosuggestClass, { Location, Suggest } from "@ubilabs/react-geosuggest";
 import withStyles from "isomorphic-style-loader/withStyles";
 import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
@@ -11,17 +11,16 @@ import GoogleMapsLoaderContext, {
 import s from "./RestaurantAddForm.scss";
 
 const Geosuggest = lazy(
-  () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+  () => import(/* webpackChunkName: 'geosuggest' */ "@ubilabs/react-geosuggest")
 );
 
-interface RestaurantAddFormProps
-  extends Pick<GeosuggestProps, "getSuggestLabel"> {
+interface RestaurantAddFormProps {
   createTempMarker: (result: google.maps.GeocoderResult) => void;
   clearTempMarker: () => void;
-  handleSuggestSelect: (
-    suggestion: Suggest,
-    geosuggest: GeosuggestClass
-  ) => void;
+  getSuggestLabel: (
+    suggest: google.maps.places.AutocompletePrediction
+  ) => string;
+  handleSuggestSelect: (suggestion?: Location) => void;
   latLng: LatLng;
 }
 
@@ -51,7 +50,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     }
   }
 
-  getCoordsForMarker = (suggest: Suggest) => {
+  getCoordsForMarker = (suggest: Suggest | null) => {
     if (suggest !== null) {
       if (this.geocoder === undefined) {
         this.geocoder = new this.maps.Geocoder();
@@ -64,8 +63,8 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     }
   };
 
-  handleSuggestSelect = (suggestion: Suggest) => {
-    this.props.handleSuggestSelect(suggestion, this.geosuggest!.current!);
+  handleSuggestSelect = (suggestion?: Location) => {
+    this.props.handleSuggestSelect(suggestion);
     this.geosuggest.current?.clear();
     this.geosuggest.current?.focus();
   };
