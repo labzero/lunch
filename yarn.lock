@@ -9499,7 +9499,7 @@ __metadata:
     sequelize: ^6.29.0
     sequelize-cli: ^6.6.0
     sequelize-mock: ^0.7.0
-    sequelize-typescript: ^2.1.5
+    sequelize-typescript: ^2.1.6
     serialize-javascript: ^6.0.1
     sinon: ^15.1.0
     source-map-support: ^0.5.21
@@ -12563,9 +12563,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize-typescript@npm:^2.1.5":
-  version: 2.1.5
-  resolution: "sequelize-typescript@npm:2.1.5"
+"sequelize-typescript@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "sequelize-typescript@npm:2.1.6"
   dependencies:
     glob: 7.2.0
   peerDependencies:
@@ -12573,7 +12573,7 @@ __metadata:
     "@types/validator": "*"
     reflect-metadata: "*"
     sequelize: ">=6.20.1"
-  checksum: 017abffa552014b14a3b2dfac4f6a4239689c5668720fc4a78a793a1f245f9bd2fd4745361e8725ad37d200af93a9e9c8b96dd07a1fb0cd833c00ace2269a35a
+  checksum: af01407d3c371510b440fe0350306e3a131a343198af1d69e3399c17b2eb1165d97bf2af0724cc439c74ba953a2fe5ff2ad32694aa434819ecee1009fadd75ba
   languageName: node
   linkType: hard
 
