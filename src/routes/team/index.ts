@@ -9,10 +9,11 @@
 
 /* eslint-disable global-require */
 import { Route } from "universal-router";
+import { AppContext, AppRoute } from "src/interfaces";
 import rootAction from "../helpers/rootAction";
 
 // The top-level (parent) route
-const team: Route = {
+const team: Route<AppRoute, AppContext> = {
   path: "",
 
   // Keep in mind, routes are evaluated in order

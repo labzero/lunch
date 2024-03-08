@@ -7,8 +7,11 @@ import {
   Model,
   Table,
 } from "sequelize-typescript";
+import { TeamWithAdminData } from "src/interfaces";
 import User from "./User";
 import Role from "./Role";
+import Restaurant from "./Restaurant";
+import Vote from "./Vote";
 
 @Table({ modelName: "team" })
 class Team extends Model {
@@ -19,6 +22,29 @@ class Team extends Model {
       attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
+    });
+
+  static findAllWithAdminData = () =>
+    Team.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Role,
+          attributes: ["userId"],
+        },
+        {
+          model: Restaurant,
+          attributes: ["id"],
+          include: [
+            {
+              model: Vote,
+              attributes: ["createdAt"],
+              order: [["createdAt", "DESC"]],
+              limit: 1,
+            },
+          ],
+        },
+      ],
     });
 
   @Column
@@ -50,6 +76,9 @@ class Team extends Model {
 
   @BelongsToMany(() => User, () => Role)
   users: User[];
+
+  @HasMany(() => Restaurant)
+  restaurants: Restaurant[];
 }
 
 export default Team;

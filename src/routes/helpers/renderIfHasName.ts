@@ -1,7 +1,11 @@
+import { RouteContext } from "universal-router";
 import { AppContext, AppRoute } from "../../interfaces";
 import redirectToLogin from "./redirectToLogin";
 
-export default (context: AppContext, makeRoute: () => AppRoute) => {
+export default (
+  context: RouteContext<AppRoute, AppContext>,
+  makeRoute: () => AppRoute
+) => {
   const state = context.store.getState();
   const user = state.user;
   const host = state.host;

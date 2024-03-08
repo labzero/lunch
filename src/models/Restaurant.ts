@@ -1,7 +1,10 @@
 import {
+  BelongsTo,
   BelongsToMany,
   Column,
+  ForeignKey,
   HasMany,
+  Index,
   Model,
   Table,
 } from "sequelize-typescript";
@@ -87,8 +90,12 @@ class Restaurant extends Model {
   @Column
   placeId: string;
 
+  @ForeignKey(() => Team)
   @Column
   teamId: string;
+
+  @BelongsTo(() => Team)
+  team: Team;
 
   @HasMany(() => Vote)
   votes: Vote[];

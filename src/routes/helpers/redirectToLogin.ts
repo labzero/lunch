@@ -1,6 +1,7 @@
-import { AppContext } from "../../interfaces";
+import { RouteContext } from "universal-router";
+import { AppContext, AppRoute } from "../../interfaces";
 
-export default (context: AppContext) => {
+export default (context: RouteContext<AppRoute, AppContext>) => {
   const stringifiedQuery = context.query?.toString();
   let params = "";
   if (context.path !== "/" || stringifiedQuery) {

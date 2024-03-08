@@ -7,7 +7,9 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import { AppContext } from "../../interfaces";
+import { RouteContext } from "universal-router";
+import { AppContext, AppRoute } from "../../interfaces";
 import render404 from "../helpers/render404";
 
-export default (context: AppContext) => render404(context);
+export default (context: RouteContext<AppRoute, AppContext>) =>
+  render404(context);

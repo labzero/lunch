@@ -17,7 +17,7 @@ import password from "./password";
 import users from "./users";
 
 // The top-level (parent) route
-const main: Route<AppContext, AppRoute> = {
+const main: Route<AppRoute, AppContext> = {
   path: "",
 
   // Keep in mind, routes are evaluated in order
@@ -47,6 +47,13 @@ const main: Route<AppContext, AppRoute> = {
       path: "/account",
       action: async (context) =>
         (await import(/* webpackChunkName: 'account' */ "./account")).default(
+          context
+        ),
+    },
+    {
+      path: "/admin",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'admin' */ "./admin")).default(
           context
         ),
     },

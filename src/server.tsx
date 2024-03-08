@@ -20,6 +20,7 @@ import cors from "cors";
 import crypto from "crypto";
 import http from "http";
 import https from "https";
+import nodeFetch from "node-fetch";
 import enforce from "express-sslify";
 import compression from "compression";
 import cookieParser from "cookie-parser";
@@ -60,6 +61,7 @@ import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
 import { AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
+import createFetch from "./createFetch";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -333,9 +335,9 @@ const render: RequestHandler = async (req, res, next) => {
       host: config.bsHost,
     };
     if (req.user) {
-      stateData.user = req.user;
+      stateData.user = req.user.dataValues;
       stateData.teams = await Team.findAllForUser(req.user);
-      stateData.team = req.team;
+      stateData.team = req.team?.dataValues;
     }
 
     const flashes = req.flash();
@@ -361,6 +363,20 @@ const render: RequestHandler = async (req, res, next) => {
       styles.forEach((style) => css.add(style._getCss()));
     };
 
+    let agent;
+    if (process.env.USE_HTTPS === "true") {
+      agent = new https.Agent({
+        rejectUnauthorized: false,
+      });
+    }
+
+    // Universal HTTP client
+    const fetchWithCache = createFetch(nodeFetch, {
+      baseUrl: config.api.serverUrl,
+      cookie: req.headers.cookie,
+      agent,
+    });
+
     const initialState = makeInitialState(stateData as Required<StateData>);
     const store = configureStore(initialState);
 
@@ -374,13 +390,14 @@ const render: RequestHandler = async (req, res, next) => {
       query: new URLSearchParams(req.query as { [key: string]: string }),
       // You can access redux through react-redux connect
       store,
+      fetch: fetchWithCache,
     };
 
     let router;
     if (req.subdomain) {
-      router = routerCreator(teamRoutes);
+      router = routerCreator(teamRoutes, fetchWithCache);
     } else {
-      router = routerCreator(mainRoutes);
+      router = routerCreator(mainRoutes, fetchWithCache);
     }
 
     const route = await router.resolve({
@@ -388,15 +405,21 @@ const render: RequestHandler = async (req, res, next) => {
       subdomain: req.subdomain,
     });
 
+    if (route == null) {
+      return next();
+    }
+
+    if (route.payload != null) {
+      context.payload = route.payload;
+    }
+
     if (route.redirect) {
-      res.redirect(route.status || 302, route.redirect);
-      return;
+      return res.redirect(route.status || 302, route.redirect);
     }
 
     const pageTitle = route.title || "Lunch";
 
     const data: HtmlProps = {
-      ...route,
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
       description:
@@ -429,14 +452,14 @@ const render: RequestHandler = async (req, res, next) => {
       apiUrl: config.api.clientUrl,
       googleApiKey: config.googleApiKey!,
       state: initialState,
+      cache: route.payload,
     };
 
     const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
     res.status(route.status || 200);
-    res.send(`<!doctype html>${html}`);
+    return res.send(`<!doctype html>${html}`);
   } catch (err) {
-    console.log("HERES THE ERROR YOU WNATED", err);
-    next(err);
+    return next(err);
   }
 };
 
