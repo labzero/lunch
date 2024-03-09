@@ -29,23 +29,19 @@ const Admin = ({ host }: AdminProps, { payload }: AppContext) => {
             </tr>
           </thead>
           <tbody>
-            {teams.map((team) => {
-              const lastVotedAt = team.restaurants
-                .flatMap((restaurant) => restaurant.votes)
-                .map((v) => dayjs(v.createdAt))
-                .sort((a, b) => a.valueOf() - b.valueOf())[0];
-
-              return (
-                <tr key={team.id}>
-                  <td>
-                    <a href={`//${team.slug}.${host}`}>{team.name}</a>
-                  </td>
-                  <td>{team.roles.length}</td>
-                  <td>{dayjs(team.createdAt).format(formatString)}</td>
-                  <td>{lastVotedAt?.format(formatString)}</td>
-                </tr>
-              );
-            })}
+            {teams.map((team) => (
+              <tr key={team.id}>
+                <td>
+                  <a href={`//${team.slug}.${host}`}>{team.name}</a>
+                </td>
+                <td>{team.roleCount}</td>
+                <td>{dayjs(team.createdAt).format(formatString)}</td>
+                <td>
+                  {team.recentVoteCreatedAt != null &&
+                    dayjs(team.recentVoteCreatedAt).format(formatString)}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
       </Container>

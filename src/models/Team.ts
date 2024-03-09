@@ -7,7 +7,7 @@ import {
   Model,
   Table,
 } from "sequelize-typescript";
-import { TeamWithAdminData } from "src/interfaces";
+import { sequelize } from "../db";
 import User from "./User";
 import Role from "./Role";
 import Restaurant from "./Restaurant";
@@ -26,25 +26,45 @@ class Team extends Model {
 
   static findAllWithAdminData = () =>
     Team.findAll({
-      order: [["createdAt", "DESC"]],
+      attributes: [
+        "name",
+        "slug",
+        "createdAt",
+        [
+          sequelize.fn(
+            "MAX",
+            sequelize.col('"restaurants->votes"."createdAt"')
+          ),
+          "recentVoteCreatedAt",
+        ],
+        [
+          sequelize.fn("COUNT", sequelize.literal('DISTINCT roles."id"')),
+          "roleCount",
+        ],
+      ],
       include: [
         {
-          model: Role,
-          attributes: ["userId"],
-        },
-        {
           model: Restaurant,
-          attributes: ["id"],
+          as: "restaurants",
+          attributes: [],
           include: [
             {
               model: Vote,
-              attributes: ["createdAt"],
-              order: [["createdAt", "DESC"]],
-              limit: 1,
+              as: "votes",
+              attributes: [],
             },
           ],
         },
+        {
+          model: Role,
+          as: "roles",
+          attributes: [],
+        },
       ],
+      group: ["team.id", 'team."name"', 'team."slug"', 'team."createdAt"'],
+      order: sequelize.literal(
+        'CASE WHEN MAX("restaurants->votes"."createdAt") IS NULL THEN 1 ELSE 0 END, "recentVoteCreatedAt" DESC'
+      ),
     });
 
   @Column

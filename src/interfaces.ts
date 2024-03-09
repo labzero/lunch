@@ -51,9 +51,10 @@ export interface Tag extends TagModel {
 
 export type Team = TeamModel;
 
-export interface TeamWithAdminData extends Omit<Team, "roles" | "restaurants"> {
-  restaurants: (Pick<Restaurant, "id"> & { votes: Pick<Vote, "createdAt"> })[];
-  roles: Pick<Role, "userId">[];
+export interface TeamWithAdminData
+  extends Pick<Team, "id" | "name" | "slug" | "createdAt"> {
+  roleCount: number;
+  recentVoteCreatedAt: string;
 }
 
 export interface Flash {
