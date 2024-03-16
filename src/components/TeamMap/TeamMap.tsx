@@ -31,13 +31,18 @@ class TeamMap extends Component<TeamMapProps> {
 
   setMap = ({ map }: { map: google.maps.Map }) => {
     this.map = map;
-    this.map.addListener("bounds_changed", () => {
+    this.map.addListener("idle", () => {
       const center = map.getCenter();
+
       if (center) {
-        this.props.setCenter({
-          lat: center.lat(),
-          lng: center.lng(),
-        });
+        const lat = center.lat();
+        const lng = center.lng();
+        if (this.props.center?.lat !== lat || this.props.center?.lng !== lng) {
+          this.props.setCenter({
+            lat,
+            lng,
+          });
+        }
       }
     });
   };
