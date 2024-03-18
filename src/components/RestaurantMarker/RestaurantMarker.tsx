@@ -95,6 +95,7 @@ const RestaurantMarker = ({ restaurant, ...props }: RestaurantMarkerProps) => {
     store: props.store,
     pathname: props.pathname,
     query: props.query,
+    fetch: props.fetch,
   };
 
   return (

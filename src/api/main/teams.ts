@@ -38,6 +38,19 @@ export default () => {
         next(err);
       }
     })
+    .get("/all", loggedIn, async (req, res, next) => {
+      if (!req.user?.superuser) {
+        res.status(404).send();
+      } else {
+        try {
+          const teams = await Team.findAllWithAdminData();
+
+          res.status(200).json({ error: false, data: teams });
+        } catch (err) {
+          next(err);
+        }
+      }
+    })
     .post("/", loggedIn, async (req, res, next) => {
       const { address, lat, lng, name, slug } = req.body;
       const message409 = "Could not create new team. It might already exist.";

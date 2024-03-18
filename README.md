@@ -134,6 +134,7 @@ DB_NAME=your_test_db_name
 SUPERUSER_NAME=test
 SUPERUSER_PASSWORD=test
 SUPERUSER_EMAIL=test@lunch.pink
+USE_HTTPS=false
 ```
 
 Then run:

@@ -17,7 +17,7 @@
     "@sendgrid/helpers": "^7.7.0",
     "@sendgrid/mail": "^7.7.0",
     "@ubilabs/react-geosuggest": "^2.16.1",
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.18.3",
     "bootstrap": "^5.2.3",
     "classnames": "^2.2.6",
@@ -45,6 +45,7 @@
     "method-override": "^3.0.0",
     "mocha-junit-reporter": "^2.2.0",
     "morgan": "^1.10.0",
+    "node-fetch": "^2.7.0",
     "normalizr": "^3.2.2",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
@@ -75,7 +76,7 @@
     "sequelize-typescript": "^2.1.6",
     "serialize-javascript": "^6.0.1",
     "source-map-support": "^0.5.21",
-    "universal-router": "^8.1.0"
+    "universal-router": "^9.2.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -103,6 +104,7 @@
     "@types/mocha": "^10.0.1",
     "@types/morgan": "^1.9.4",
     "@types/node": "^20.2.5",
+    "@types/node-fetch": "^2.6.11",
     "@types/passport": "^1.0.11",
     "@types/passport-google-oauth20": "^2.0.11",
     "@types/passport-local": "^1.0.35",

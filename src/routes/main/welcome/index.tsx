@@ -8,14 +8,15 @@
  */
 
 import React from "react";
+import { RouteContext } from "universal-router";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
-import { AppContext } from "../../../interfaces";
+import { AppContext, AppRoute } from "../../../interfaces";
 import redirectToLogin from "../../helpers/redirectToLogin";
 import WelcomeContainer from "./WelcomeContainer";
 
 const title = "Welcome!";
 
-export default (context: AppContext) => {
+export default (context: RouteContext<AppRoute, AppContext>) => {
   const state = context.store.getState();
   const user = state.user;
 
