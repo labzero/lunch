@@ -491,11 +491,11 @@ if (process.env.USE_HTTPS === "true") {
   wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
     console.log(
-      `The websockets server is running at https://local.lunch.pink:${config.wsPort}/`
+      `The server is running at https://local.lunch.pink:${config.port}/`
     );
   });
 } else {
-  wsServer.listen(config.port, () => {
+  wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
     console.log(
       `The server is running at http://local.lunch.pink:${config.port}/`
