@@ -283,10 +283,6 @@ const config = {
   // Specify what bundle information gets displayed
   // https://webpack.js.org/configuration/stats/
   stats: "errors-warnings",
-
-  // Choose a developer tool to enhance debugging
-  // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? "inline-source-map" : "source-map",
 };
 
 //
@@ -329,19 +325,22 @@ const clientConfig = {
         try {
           const fileFilter = (file) => !file.endsWith(".map");
           const addPath = (file) => manifest.getPublicPath(file);
-          const chunkFiles = stats.compilation.chunkGroups.reduce((acc, c) => {
-            acc[c.name] = [
-              ...(acc[c.name] || []),
-              ...c.chunks.reduce(
-                (files, cc) => [
-                  ...files,
-                  ...Array.from(cc.files).filter(fileFilter).map(addPath),
-                ],
-                []
-              ),
-            ];
-            return acc;
-          }, Object.create(null));
+          const chunkFiles = stats.compilation.chunkGroups.reduce(
+            (acc, c) => ({
+              ...acc,
+              [c.name]: [
+                ...(acc[c.name] || []),
+                ...c.chunks.reduce(
+                  (files, cc) => [
+                    ...files,
+                    ...Array.from(cc.files).filter(fileFilter).map(addPath),
+                  ],
+                  []
+                ),
+              ],
+            }),
+            Object.create(null)
+          );
           fs.writeFileSync(chunkFileName, JSON.stringify(chunkFiles, null, 2));
         } catch (err) {
           console.error(`ERROR: Cannot write ${chunkFileName}: `, err);
@@ -391,6 +390,10 @@ const clientConfig = {
       tls: "empty",
     },
   },
+
+  // Choose a developer tool to enhance debugging
+  // https://webpack.js.org/configuration/devtool/#devtool
+  devtool: isDebug ? "inline-source-map" : "source-map",
 };
 
 //

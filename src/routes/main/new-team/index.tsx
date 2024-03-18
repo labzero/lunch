@@ -8,14 +8,15 @@
  */
 
 import React from "react";
+import { RouteContext } from "universal-router";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
 import renderIfHasName from "../../helpers/renderIfHasName";
-import { AppContext } from "../../../interfaces";
+import { AppContext, AppRoute } from "../../../interfaces";
 import NewTeamContainer from "./NewTeamContainer";
 
 const title = "New team";
 
-export default (context: AppContext) =>
+export default (context: RouteContext<AppRoute, AppContext>) =>
   renderIfHasName(context, () => ({
     title,
     chunks: ["map", "new-team"],

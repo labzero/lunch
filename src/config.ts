@@ -20,7 +20,9 @@ export const api = {
   // API URL to be used in the server-side code
   serverUrl:
     process.env.API_SERVER_URL ||
-    `http://localhost:${process.env.PORT || 3000}`,
+    `http${process.env.USE_HTTPS === "true" ? "s" : ""}://localhost:${
+      process.env.PORT || 3000
+    }`,
 };
 export const host =
   process.env.WEBSITE_HOSTNAME ||

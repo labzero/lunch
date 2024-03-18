@@ -7,12 +7,13 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import { RouteContext } from "universal-router";
 import hasRole from "../../../helpers/hasRole";
-import { AppContext } from "../../../interfaces";
+import { AppContext, AppRoute } from "../../../interfaces";
 import renderIfHasName from "../../helpers/renderIfHasName";
 import render404 from "../../helpers/render404";
 
-export default (context: AppContext) => {
+export default (context: RouteContext<AppRoute, AppContext>) => {
   const state = context.store.getState();
   const host = state.host;
   const team = state.team;

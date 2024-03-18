@@ -51,6 +51,12 @@ export interface Tag extends TagModel {
 
 export type Team = TeamModel;
 
+export interface TeamWithAdminData
+  extends Pick<Team, "id" | "name" | "slug" | "createdAt"> {
+  roleCount: number;
+  recentVoteCreatedAt: string;
+}
+
 export interface Flash {
   id: string;
   message: string;
@@ -600,18 +606,34 @@ export type Reducer<T extends keyof State> = (
 
 export type Dispatch = ThunkDispatch<State, unknown, Action>;
 
+export type Cache = Record<string, Record<string, any>>;
+
+export type Fetch = (url: string, options?: any) => Promise<any>;
+
+export type FetchWithCache = (
+  url: string,
+  cache: Cache,
+  options?: any
+) => Promise<any>;
+
 export interface App {
   apiUrl: string;
   state: NonNormalizedState;
   googleApiKey: string;
+  cache?: Cache;
+}
+
+export interface WindowWithApp extends Window {
+  App: App;
 }
 
 export interface AppContext extends ResolveContext {
   insertCss: InsertCSS;
   googleApiKey: string;
-  pathname: string;
   query?: URLSearchParams;
   store: EnhancedStore<State, Action>;
+  fetch: FetchWithCache;
+  payload?: Cache;
 }
 
 export interface AppRoute {
@@ -622,6 +644,8 @@ export interface AppRoute {
   fullTitle?: string;
   ogTitle?: string;
   redirect?: string;
+  queries?: string[];
+  payload?: Cache;
   status?: number;
   title?: string;
 }

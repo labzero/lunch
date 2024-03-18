@@ -8,12 +8,13 @@
  */
 
 import React from "react";
+import { RouteContext } from "universal-router";
 import LayoutContainer from "../../components/Layout/LayoutContainer";
 import renderIfLoggedOut from "../helpers/renderIfLoggedOut";
-import { AppContext } from "../../interfaces";
+import { AppContext, AppRoute } from "../../interfaces";
 import LoginContainer from "./LoginContainer";
 
-function action(context: AppContext) {
+function action(context: RouteContext<AppRoute, AppContext>) {
   const state = context.store.getState();
 
   const subdomain = context.subdomain;

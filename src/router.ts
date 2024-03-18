@@ -8,13 +8,23 @@
  */
 
 import UniversalRouter, { Route } from "universal-router";
-import { AppContext, AppRoute } from "./interfaces";
+import { AppContext, AppRoute, FetchWithCache } from "./interfaces";
 
-export default (routes: Route<AppContext, AppRoute>) =>
-  new UniversalRouter<AppContext, AppRoute>(routes, {
-    async resolveRoute(context, params): Promise<AppRoute | undefined> {
+export default (
+  routes: Route<AppRoute, AppContext>,
+  fetchWithCache: FetchWithCache
+) =>
+  new UniversalRouter<AppRoute, AppContext>(routes, {
+    async resolveRoute(context, params): Promise<AppRoute | null | undefined> {
       if (typeof context.route.action === "function") {
         const route = await context.route.action(context, params);
+        if (route && route.queries && route.payload == null) {
+          const cache = {};
+          await Promise.all(
+            route.queries.map((url) => fetchWithCache(url, cache))
+          );
+          route.payload = cache;
+        }
         return route;
       }
       return undefined;

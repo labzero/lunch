@@ -15,13 +15,10 @@ import configureStore from "./store/configureStore";
 import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
-import { AppContext, App as AppType } from "./interfaces";
+import { AppContext, WindowWithApp } from "./interfaces";
+import createFetch from "./createFetch";
 
 let subdomain: string | undefined;
-
-interface WindowWithApp extends Window {
-  App: AppType;
-}
 
 declare const window: WindowWithApp;
 
@@ -55,6 +52,10 @@ if (!subdomain) {
 const store = configureStore(window.App.state, { history });
 /* eslint-enable no-underscore-dangle */
 
+const fetchWithCache = createFetch(fetch, {
+  baseUrl: window.App.apiUrl,
+});
+
 // Global (context) variables that can be easily accessed from any React component
 // https://facebook.github.io/react/docs/context.html
 const context: AppContext = {
@@ -73,6 +74,7 @@ const context: AppContext = {
   store,
   pathname: "",
   query: undefined,
+  fetch: fetchWithCache,
 };
 
 const container = document.getElementById("app");
@@ -89,7 +91,7 @@ if (subdomain) {
   routes = require("./routes/main").default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
 }
 
-const router = routerCreator(routes);
+const router = routerCreator(routes, fetchWithCache);
 
 // Re-render the app when window.location changes
 const onLocationChange = async ({
@@ -122,6 +124,14 @@ const onLocationChange = async ({
       ...context,
       subdomain,
     });
+
+    if (route == null) {
+      throw new Error("No route returned");
+    }
+
+    if (route.payload != null) {
+      context.payload = route.payload;
+    }
 
     // Prevent multiple page renders during the routing process
     if (currentLocation.key !== location.key) {
@@ -217,7 +227,7 @@ const onLocationChange = async ({
 // Handle client-side navigation by using HTML5 History API
 // For more information visit https://github.com/mjackson/history#readme
 history!.listen(onLocationChange);
-onLocationChange({ action: Action.Replace, location: currentLocation });
+onLocationChange({ location: currentLocation });
 
 // Enable Hot Module Replacement (HMR)
 /* if (module.hot) {
