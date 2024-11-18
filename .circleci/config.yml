@@ -225,12 +225,12 @@ workflows:
             branches:
               only: develop
 
-      - deploy-staging:
-          requires:
-            - build
-          filters:
-            branches:
-              only: develop
+      # - deploy-staging:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: develop
 
   deploy:
     jobs:
