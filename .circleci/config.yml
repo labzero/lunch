@@ -211,7 +211,7 @@ workflows:
                 - develop
                 - master
 
-  develop-test-deploy:
+  develop-test:
     jobs:
       - test:
           filters:
@@ -225,34 +225,9 @@ workflows:
             branches:
               only: develop
 
-      # - deploy-staging:
-      #     requires:
-      #       - build
-      #     filters:
-      #       branches:
-      #         only: develop
-
   deploy:
     jobs:
       - build:
-          filters:
-            tags:
-              only: /^lunch-v.*/
-            branches:
-              ignore: /.*/
-
-      - deploy-staging:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /^lunch-v.*/
-            branches:
-              ignore: /.*/
-      - hold:
-          type: approval
-          requires:
-            - deploy-staging
           filters:
             tags:
               only: /^lunch-v.*/
