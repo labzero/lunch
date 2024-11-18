@@ -128,7 +128,7 @@ jobs:
       - checkout
 
       - setup_remote_docker:
-          version: 20.10.11
+          # version: 20.10.11
           docker_layer_caching: true
 
       - run:
@@ -225,12 +225,12 @@ workflows:
             branches:
               only: develop
 
-      - deploy-staging:
-          requires:
-            - build
-          filters:
-            branches:
-              only: develop
+      # - deploy-staging:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: develop
 
   deploy:
     jobs:
