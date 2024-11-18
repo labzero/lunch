@@ -172,19 +172,6 @@ jobs:
             aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${CONTAINER_REGISTRY}
             docker push ${DOCKER_TAG}
 
-  deploy-staging:
-    docker:
-      - image: cimg/aws:2023.01
-
-    # working_directory: ~/repo
-
-    steps:
-      - aws-deploy:
-          task_family: lunch-staging
-          ecs_cluster: Lunch-Staging
-          service_name: lunch-staging
-          migration_task: staging_lunch_migrate
-
   deploy-production:
     docker:
       - image: cimg/aws:2023.01
@@ -228,6 +215,14 @@ workflows:
   deploy:
     jobs:
       - build:
+          filters:
+            tags:
+              only: /^lunch-v.*/
+            branches:
+              ignore: /.*/
+              
+      - hold:
+          type: approval
           filters:
             tags:
               only: /^lunch-v.*/
