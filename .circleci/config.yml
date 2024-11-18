@@ -120,7 +120,7 @@ jobs:
 
   build:
     docker:
-      - image: cimg/aws:2023.01
+      - image: cimg/aws:2024.03
 
     # working_directory: ~/repo
 
@@ -128,7 +128,6 @@ jobs:
       - checkout
 
       - setup_remote_docker:
-          # version: 20.10.11
           docker_layer_caching: true
 
       - run:
@@ -174,7 +173,7 @@ jobs:
 
   deploy-production:
     docker:
-      - image: cimg/aws:2023.01
+      - image: cimg/aws:2024.03
 
     # working_directory: ~/repo
 
@@ -220,9 +219,11 @@ workflows:
               only: /^lunch-v.*/
             branches:
               ignore: /.*/
-              
+
       - hold:
           type: approval
+          requires:
+            - build
           filters:
             tags:
               only: /^lunch-v.*/
