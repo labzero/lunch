@@ -15,11 +15,12 @@ import New from "./New";
 
 export default (context: RouteContext<AppRoute, AppContext>) => {
   const email = context.query?.get("email");
+  const recaptchaSiteKey = context.recaptchaSiteKey;
 
   return {
     component: (
       <LayoutContainer path={context.pathname}>
-        <New email={email} />
+        <New email={email} recaptchaSiteKey={recaptchaSiteKey} />
       </LayoutContainer>
     ),
     title: "Invitation",

@@ -46,6 +46,10 @@ For `GOOGLE_*` env variables:
 - Go back to the Credentials tab and create two API keys - one for the client, and one for the server.
 - On each API key, add `http://lunch.pink`, `https://lunch.pink`, `http://*.lunch.pink`, and `https://*.lunch.pink` as HTTP referrers.
 
+#### reCAPTCHA
+
+For `RECAPTCHA_*` env variables, [sign up for reCAPTCHA](https://www.google.com/recaptcha) and generate a site and server key.
+
 #### Database
 
 Set up a PostgreSQL database and enter the admin credentials into `.env`. If you want to use another database dialect, change it in `database.js`.

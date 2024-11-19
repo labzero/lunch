@@ -91,6 +91,7 @@ export interface RestaurantMarkerProps extends AppContext {
 const RestaurantMarker = ({ restaurant, ...props }: RestaurantMarkerProps) => {
   const context = {
     googleApiKey: props.googleApiKey,
+    recaptchaSiteKey: props.recaptchaSiteKey,
     insertCss: props.insertCss,
     store: props.store,
     pathname: props.pathname,

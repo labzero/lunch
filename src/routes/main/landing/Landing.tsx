@@ -1,36 +1,70 @@
-import React from "react";
+import React, { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
+import submitRecaptchaForm from "../../helpers/submitRecaptchaForm";
 import search from "./search.png";
 import tag from "./tag.png";
 import vote from "./vote.png";
 import decide from "./decide.png";
 import s from "./Landing.scss";
 
-const renderForm = () => (
-  <Form className={s.form} action="/invitation?success=sent" method="post">
-    <Form.Group className={s.formGroup} controlId="landing-email">
-      <Form.Label visuallyHidden>Email</Form.Label>
-      <Form.Control
-        size="lg"
-        className={s.field}
-        name="email"
-        placeholder="Enter your email"
-        required
-        type="email"
-      />
-    </Form.Group>{" "}
-    <Button size="lg" variant="primary" type="submit">
-      Get invited
-    </Button>
-  </Form>
-);
+const action = "/invitation?success=sent";
 
-const Landing = () => (
+const InvitationForm = ({ recaptchaSiteKey }: { recaptchaSiteKey: string }) => {
+  const formRef = React.createRef();
+  const recaptchaRef = React.createRef();
+
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = async (event: React.TargetedEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const token = await recaptchaRef.current.executeAsync();
+
+    submitRecaptchaForm(action, {
+      email,
+      "g-recaptcha-response": token,
+    });
+  };
+
+  return (
+    <Form
+      className={s.form}
+      action={action}
+      method="post"
+      onSubmit={handleSubmit}
+      ref={formRef}
+    >
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        size="invisible"
+        sitekey={recaptchaSiteKey}
+      />
+      <Form.Group className={s.formGroup} controlId="landing-email">
+        <Form.Label visuallyHidden>Email</Form.Label>
+        <Form.Control
+          size="lg"
+          className={s.field}
+          name="email"
+          onChange={(event) => setEmail(event.currentTarget.value)}
+          placeholder="Enter your email"
+          required
+          type="email"
+        />
+      </Form.Group>{" "}
+      <Button size="lg" variant="primary" type="submit">
+        Get invited
+      </Button>
+    </Form>
+  );
+};
+
+const Landing = ({ recaptchaSiteKey }: { recaptchaSiteKey: string }) => (
   <div className={s.root}>
     <section className={s.jumbotron}>
       <Container>
@@ -45,7 +79,7 @@ const Landing = () => (
               Unsure what to eat? Want to leave the office for a bit and grab
               some grub with your team? Try&nbsp;Lunch!
             </p>
-            {renderForm()}
+            <InvitationForm recaptchaSiteKey={recaptchaSiteKey} />
           </Col>
         </Row>
       </Container>
@@ -107,7 +141,7 @@ const Landing = () => (
         <h3>Sign up today!</h3>
         <Row>
           <Col xs={12} sm={{ span: 6, offset: 3 }}>
-            {renderForm()}
+            <InvitationForm recaptchaSiteKey={recaptchaSiteKey} />
           </Col>
         </Row>
       </div>

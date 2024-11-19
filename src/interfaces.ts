@@ -620,6 +620,7 @@ export interface App {
   apiUrl: string;
   state: NonNormalizedState;
   googleApiKey: string;
+  recaptchaSiteKey: string;
   cache?: Cache;
 }
 
@@ -630,6 +631,7 @@ export interface WindowWithApp extends Window {
 export interface AppContext extends ResolveContext {
   insertCss: InsertCSS;
   googleApiKey: string;
+  recaptchaSiteKey: string;
   query?: URLSearchParams;
   store: EnhancedStore<State, Action>;
   fetch: FetchWithCache;
