@@ -25,7 +25,13 @@ describe("middlewares/invitation", () => {
   let UserMock: SequelizeMockObject;
   let flashSpy: SinonSpy;
 
+  let requestParams: Record<string, string>;
+
   beforeEach(() => {
+    requestParams = {
+      email: "jeffrey@labzero.com",
+      "g-recaptcha-response": "12345",
+    };
     InvitationMock = dbMock.define("invitation", {});
     RoleMock = dbMock.define("role", {});
     UserMock = dbMock.define("user", {});
@@ -42,6 +48,13 @@ describe("middlewares/invitation", () => {
           default: {
             sendMail: sendMailSpy,
           },
+        }),
+        "node-fetch": mockEsmodule({
+          default: async () => ({
+            json: async () => ({
+              success: true,
+            }),
+          }),
         }),
         ...deps,
       }).default;
@@ -83,7 +96,7 @@ describe("middlewares/invitation", () => {
 
         request(app)
           .post("/")
-          .send({ email: "jeffrey@labzero.com" })
+          .send(requestParams)
           .then((r) => {
             response = r;
             done();
@@ -118,7 +131,7 @@ describe("middlewares/invitation", () => {
 
         request(app)
           .post("/")
-          .send({ email: "jeffrey@labzero.com" })
+          .send(requestParams)
           .then((r) => {
             response = r;
             done();
@@ -151,7 +164,7 @@ describe("middlewares/invitation", () => {
           })
         );
 
-        return request(app).post("/").send({ email: "jeffrey@labzero.com" });
+        return request(app).post("/").send(requestParams);
       });
 
       it("sends confirmation", () => {

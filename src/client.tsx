@@ -69,6 +69,7 @@ const context: AppContext = {
     };
   },
   googleApiKey: window.App.googleApiKey,
+  recaptchaSiteKey: window.App.recaptchaSiteKey,
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
   store,

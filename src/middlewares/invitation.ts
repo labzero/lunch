@@ -1,4 +1,5 @@
 import { Request, Router } from "express";
+import fetch from "node-fetch";
 import { bsHost } from "../config";
 import generateToken from "../helpers/generateToken";
 import generateUrl from "../helpers/generateUrl";
@@ -69,11 +70,31 @@ Add them here: ${generateUrl(
       }
     })
     .post("/", async (req, res, next) => {
-      const { email } = req.body;
+      const { email, "g-recaptcha-response": clientRecaptchaResponse } =
+        req.body;
 
       try {
-        if (!email) {
-          req.flash("error", "Email is required.");
+        if (!email || !clientRecaptchaResponse) {
+          if (!email) {
+            req.flash("error", "Email is required.");
+          }
+          if (!clientRecaptchaResponse) {
+            req.flash("error", "No reCAPTCHA response.");
+          }
+          return req.session.save(() => {
+            res.redirect("/invitation/new");
+          });
+        }
+
+        const recaptchaResponse = await fetch(
+          `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${clientRecaptchaResponse}`,
+          {
+            method: "POST",
+          }
+        ).then((response) => response.json());
+
+        if (!recaptchaResponse.success) {
+          req.flash("error", "Bad reCAPTCHA response. Please try again.");
           return req.session.save(() => {
             res.redirect("/invitation/new");
           });

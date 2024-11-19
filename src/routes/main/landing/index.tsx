@@ -16,12 +16,13 @@ import Landing from "./Landing";
 
 export default (context: RouteContext<AppRoute, AppContext>) => {
   const state = context.store.getState();
+  const recaptchaSiteKey = context.recaptchaSiteKey;
 
   return renderIfLoggedOut(state, () => ({
     chunks: ["landing"],
     component: (
       <LayoutContainer path={context.pathname}>
-        <Landing />
+        <Landing recaptchaSiteKey={recaptchaSiteKey} />
       </LayoutContainer>
     ),
     fullTitle: "Lunch – Team voting for nearby restaurants",

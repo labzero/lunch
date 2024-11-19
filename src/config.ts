@@ -42,3 +42,4 @@ export const auth = {
   sendgrid: { secret: process.env.SENDGRID_API_KEY },
 };
 export const googleApiKey = process.env.GOOGLE_CLIENT_APIKEY;
+export const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY;
