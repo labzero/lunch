@@ -385,6 +385,7 @@ const render: RequestHandler = async (req, res, next) => {
     const context: AppContext = {
       insertCss,
       googleApiKey: config.googleApiKey!,
+      recaptchaSiteKey: config.recaptchaSiteKey!,
       // The twins below are wild, be careful!
       pathname: req.path,
       query: new URLSearchParams(req.query as { [key: string]: string }),
@@ -451,6 +452,7 @@ const render: RequestHandler = async (req, res, next) => {
     data.app = {
       apiUrl: config.api.clientUrl,
       googleApiKey: config.googleApiKey!,
+      recaptchaSiteKey: config.recaptchaSiteKey!,
       state: initialState,
       cache: route.payload,
     };
