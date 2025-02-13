@@ -75,7 +75,7 @@
     "sequelize": "^6.29.0",
     "sequelize-cli": "^6.6.0",
     "sequelize-typescript": "^2.1.6",
-    "serialize-javascript": "^6.0.1",
+    "serialize-javascript": "^6.0.2",
     "source-map-support": "^0.5.21",
     "universal-router": "^9.2.0"
   },
